@@ -2,9 +2,9 @@
 
 ## 构建环境
 
-基线为 .NET 10 SDK；源代码包含 WPF、P/Invoke ConPTY 和 Windows Job Object。推荐 Windows 11 x64 首轮验证。发布可以选择 win-x64 或 win-arm64；arm64 没有在本次环境验证，不代表切换 RID 后所有终端交互已自动通过。
+基线为 .NET 10 SDK；源代码包含 WPF、P/Invoke ConPTY 和 Windows Job Object。推荐 Windows 11 x64 首轮验证。发布可以选择 win-x64、win-x86 或 win-arm64；本轮提供 x64 / x86，arm64 未验收。x86 在 x64 Windows 兼容层验证，不代表已在独立 32 位系统测试。
 
-本次已在 Windows x64 / .NET SDK 10.0.204 上完成 Release 编译、Core 与 Windows 原生规格测试、18 张 WPF 深浅主题渲染检查，以及自包含单文件 EXE / ZIP 发布。`tools/Test-Portable.ps1` 验证复制单个 EXE 后的首次绑定、没有环境、取消、已有配置重开和正常退出。人工 DPI、IME 和完整业务工作流尚未验收，详见 [测试记录](TESTING.md)。
+本次已在 Windows x64 / .NET SDK 10.0.204 上完成 Release 编译、Core 与 Windows 原生规格测试、中英双语 WPF 深浅主题渲染检查，以及自包含单文件 EXE / ZIP 发布。`tools/Test-Portable.ps1` 验证复制单个 EXE 后的首次绑定、没有环境、取消、已有配置重开和正常退出。人工 DPI、IME 和完整业务工作流尚未验收，详见 [测试记录](TESTING.md)。
 
 ## 一键构建
 

@@ -1,5 +1,13 @@
 # Change log
 
+## 1.0.0 — 2026-09-23
+
+- Added live Chinese/English UI and per-user language preferences; drafts, running jobs and terminal sessions survive switching.
+- Replaced layout-consuming error banners with overlay notifications and full error details.
+- Tightened action settings spacing and moved language selection into the sidebar footer.
+- Added bilingual quickstart documentation with actual native WPF screenshots.
+- Added Windows x86 packaging alongside x64; binaries remain unsigned and manual acceptance scope is documented in docs/TESTING.md.
+
 ## Action settings split layout
 
 - Replaced the action dropdown with a persistent left-side list and independently scrolling configuration panel.

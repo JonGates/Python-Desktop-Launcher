@@ -19,6 +19,10 @@ def check(ok: bool, message: str) -> None:
     (checks if ok else errors).append(message)
 
 def main() -> int:
+    check('<Version>1.0.0</Version>' in (ROOT/'Directory.Build.props').read_text('utf-8-sig'), 'Release version is 1.0.0')
+    build_script = (ROOT/'tools/Build.ps1').read_text('utf-8-sig')
+    check("'win-x86'" in build_script, 'Build supports Windows x86')
+    check("'README.zh-CN.md'" in build_script and "'docs/images'" in build_script, 'Build packages bilingual quickstart assets')
     xmls = sorted(set(ROOT.glob('src/**/*.xaml')) | set(ROOT.glob('**/*.csproj')) |
                   {ROOT / 'Directory.Build.props', ROOT / 'NuGet.Config', ROOT / 'src/ProjectLauncher.Desktop/app.manifest'})
     trees = {}
@@ -89,7 +93,7 @@ def main() -> int:
             except Exception as exc:
                 check(False, f'YAML structure: {path}: {exc}')
         notes.append('YAML fixture checks used PyYAML; they do not verify YamlDotNet behavior or C# validation.')
-    for path in [ROOT/'README.md', *ROOT.glob('docs/*.md'), ROOT/'AGENTS.md']:
+    for path in [ROOT/'README.md', ROOT/'README.zh-CN.md', *ROOT.glob('docs/*.md'), ROOT/'AGENTS.md']:
         text = re.sub(r'```.*?```','',path.read_text('utf-8-sig'),flags=re.S)
         for link in re.findall(r'\]\(([^)]+)\)', text):
             if '://' in link or link.startswith('#'):

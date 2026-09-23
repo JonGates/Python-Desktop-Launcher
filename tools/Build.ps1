@@ -1,6 +1,6 @@
 ﻿[CmdletBinding()]
 param(
-    [ValidateSet('win-x64','win-arm64')][string]$Runtime = 'win-x64',
+    [ValidateSet('win-x64','win-x86','win-arm64')][string]$Runtime = 'win-x64',
     [switch]$SkipTests,
     [switch]$VerifyWindows
 )
@@ -75,6 +75,11 @@ try {
         Copy-Item $cli (Join-Path $dest 'Launcher.Cli.exe') -Force
         Copy-Item (Join-Path $root 'LICENSE') (Join-Path $dest 'LICENSE-Launcher.txt') -Force
         Copy-Item (Join-Path $root 'THIRD_PARTY_NOTICES.md') $dest -Force
+        Copy-Item (Join-Path $root 'LICENSE') $dest -Force
+        foreach ($readme in @('README.md', 'README.zh-CN.md')) { Copy-Item (Join-Path $root $readme) $dest -Force }
+        New-Item -ItemType Directory -Force -Path (Join-Path $dest 'docs') | Out-Null
+        Get-ChildItem (Join-Path $root 'docs') -Filter '*.md' -File | Copy-Item -Destination (Join-Path $dest 'docs') -Force
+        Copy-Item (Join-Path $root 'docs/images') -Destination (Join-Path $dest 'docs') -Recurse
     }
     Copy-LicenseNotices (Join-Path $portable 'licenses')
     Copy-Item -LiteralPath (Join-Path $portable 'licenses') -Destination $demo -Recurse

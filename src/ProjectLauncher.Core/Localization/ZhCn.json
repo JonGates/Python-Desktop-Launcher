@@ -422,7 +422,7 @@
   "Log.Exit": "\n[退出码 {0}]\n",
   "Log.End": "\n── {0} · {1:0.0} 秒 ──\n",
   "History.Detail": "{0}\n{1:yyyy-MM-dd HH:mm:ss}\n状态：{2} / 退出码：{3}\n耗时：{4:0.0} 秒\n\n命令（脱敏）：\n{5}\n\n磁盘日志：\n{6}",
-  "Environment.Diagnostics": "Project Launcher 2.0.0-preview.1\n系统：{0}\n进程架构：{1}\n配置：{2}\n项目：{3}\n模式：{4}\n项目 Python：{5}\nuv：{6}\n\n{7}",
+  "Environment.Diagnostics": "Project Launcher 1.0.0\n系统：{0}\n进程架构：{1}\n配置：{2}\n项目：{3}\n模式：{4}\n项目 Python：{5}\nuv：{6}\n\n{7}",
   "Runtime.0": "该运行器已经有任务在执行。",
   "Runtime.1": "[启动器] Job Object 绑定失败，将使用进程树终止兜底：",
   "Runtime.2": "\n[启动器] 输出管道未及时关闭，已停止等待。\n",

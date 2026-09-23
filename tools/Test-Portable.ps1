@@ -4,6 +4,20 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not $LauncherPath) { $LauncherPath = Join-Path $root 'artifacts/portable/Launcher.exe' }
 $LauncherPath = (Resolve-Path -LiteralPath $LauncherPath).Path
+# Windows PowerShell/.NET Framework cannot reliably enumerate WOW64 modules
+# from a 64-bit Process instance. Match the test host to the executable.
+$peStream = [IO.File]::OpenRead($LauncherPath)
+$peReader = [IO.BinaryReader]::new($peStream)
+try {
+    $peStream.Position = 0x3c
+    $peOffset = $peReader.ReadInt32()
+    $peStream.Position = $peOffset + 4
+    $machine = $peReader.ReadUInt16()
+} finally { $peReader.Dispose() }
+if ($machine -eq 0x014c -and [IntPtr]::Size -eq 8) {
+    & "$env:WINDIR/SysWOW64/WindowsPowerShell/v1.0/powershell.exe" -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -LauncherPath $LauncherPath
+    exit $LASTEXITCODE
+}
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 $runRoot = Join-Path $root ('artifacts/portable-test-' + [guid]::NewGuid().ToString('N'))
@@ -42,6 +56,15 @@ function Close-Launcher($Process) {
     }
 }
 try {
+    $portable = Split-Path -Parent $LauncherPath
+    foreach ($relative in @('README.md', 'README.zh-CN.md', 'docs/images/launcher-en.png', 'docs/images/launcher-zh-CN.png')) {
+        $packaged = Join-Path $portable $relative
+        if (-not (Test-Path -LiteralPath $packaged)) { throw "Missing bilingual package asset: $relative" }
+        if ((Get-FileHash -LiteralPath $packaged).Hash -ne (Get-FileHash -LiteralPath (Join-Path $root $relative)).Hash) {
+            throw "Stale bilingual package asset: $relative"
+        }
+    }
+    $results.Add('PASS portable bilingual quickstart and native screenshots match source')
     foreach ($scenario in @('已有环境 中文项目', '没有环境 中文项目', '取消接入')) {
         $project = Join-Path $runRoot $scenario
         New-Item -ItemType Directory -Path $project | Out-Null
@@ -64,10 +87,15 @@ try {
                 if (-not $process.WaitForExit(10000)) { throw 'Cancel did not exit.' }
                 if (Test-Path -LiteralPath $config) { throw 'Cancel wrote configuration.' }
             } else {
-                [void](Wait-Window $process '* · Project Launcher')
-                $process.Refresh()
+                [void](Wait-Window $process '* · Project Launcher' 'LanguageSelector')
                 # Single-file .NET can statically link CoreCLR. Check the bundled WPF native runtime instead.
-                $runtime = @($process.Modules | Where-Object ModuleName -eq 'wpfgfx_cor3.dll')
+                $moduleDeadline = [DateTime]::UtcNow.AddSeconds(10)
+                do {
+                    $process.Refresh()
+                    $runtime = @($process.Modules | Where-Object ModuleName -eq 'wpfgfx_cor3.dll')
+                    if ($runtime.Count -eq 1) { break }
+                    Start-Sleep -Milliseconds 100
+                } while ([DateTime]::UtcNow -lt $moduleDeadline)
                 if ($runtime.Count -ne 1 -or $runtime[0].FileName -notlike '*\.net\Launcher\*') { throw "Unexpected WPF runtime modules: $($runtime.FileName -join ', ')" }
                 if (-not (Test-Path -LiteralPath $config)) { throw 'Setup did not save configuration.' }
                 $yaml = Get-Content -LiteralPath $config -Raw
@@ -83,10 +111,10 @@ try {
             Rename-Item -LiteralPath $config -NewName 'Launcher.yaml'
             $before = (Get-FileHash -LiteralPath $renamed).Hash
             $process = Start-Process -FilePath (Join-Path $project 'Launcher.exe') -WorkingDirectory $root -WindowStyle Hidden -PassThru
-            try { [void](Wait-Window $process '* · Project Launcher') } finally { Close-Launcher $process }
+            try { [void](Wait-Window $process '* · Project Launcher' 'LanguageSelector') } finally { Close-Launcher $process }
             if ((Get-FileHash -LiteralPath $renamed).Hash -ne $before) { throw 'Reopening modified existing Launcher.yaml.' }
             $results.Add('PASS existing Launcher.yaml loads directly and stays byte-identical')
-            $cli = Join-Path $root 'artifacts/portable/Launcher.Cli.exe'
+            $cli = Join-Path $portable 'Launcher.Cli.exe'
             & $cli env --project $project --trust
             if ($LASTEXITCODE -ne 0) { throw 'Bound Python environment probe failed.' }
             $results.Add('PASS bound real Python environment probe')

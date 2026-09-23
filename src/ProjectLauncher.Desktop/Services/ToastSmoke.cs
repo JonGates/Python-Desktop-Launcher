@@ -39,7 +39,7 @@ internal static class ToastSmoke
                 bitmap.Render(window); png.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
                 using (var file = File.Create(Path.Combine(directory, theme + "-toast.png"))) png.Save(file);
                 Exception? detailError = null;
-                window.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => {
+                _ = window.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => {
                     var dialog = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Owner == window);
                     try {
                         if (dialog is null || !Descendants<TextBox>(dialog).Any(t => t.Text.Length == 1200))

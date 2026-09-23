@@ -132,6 +132,16 @@ ConPTY 后端和 VT 渲染是分开的：后端提供伪控制台，不自动替
 
 ## 给 Codex 的执行说明
 
+### 国际化与通知
+
+Core 的 `Localization/ZhCn.json` 与 `EnUs.json` 是同键嵌入资源。新增文案要同时添加两种语言，使用稳定资源键和格式参数，不按渲染后的中文反向匹配；格式中的字面大括号需转义。Core 的 `LocalizedDiagnostic` 保留键、参数和原始技术信息，`ConfigException` 在显示边界渲染。
+
+Desktop 在启动窗口前初始化 `LocalizationService`。XAML 使用 `{loc:LocalizedText Key}`，代码创建的控件使用 `L.Localize` 或 `L.Dynamic`；动态文案闭包只捕获稳定上下文。选项值使用不变标识，本地化显示不能参与业务判断。不要修改业务线程的 CurrentCulture、重建页面或重写终端缓冲来切换语言。
+
+`ShellViewModel` 管理通知状态，`ToastHost` 只负责覆盖层显示。字段合法性独立于通知是否关闭：关闭后再次保存非法值仍须阻止，修正字段只清除本来源的提示。新增通知优先保留异常或资源键，避免冻结当前语言。
+
+`LocalizationSpecs` 检查资源、偏好恢复和结构化诊断；原生 `LocalizationSmoke`、`ToastSmoke` 与 `BilingualLayoutSmoke` 验证草稿保留、不占位通知和中英深浅主题矩阵。实际进程与 CMD 变量保留由 `ActionQuickControlSmoke` 验证。测试使用隔离偏好，不修改开发者的语言选择。
+
 项目根 `AGENTS.md` 已整理不变式。建议第一次指令是：
 
 ```text
