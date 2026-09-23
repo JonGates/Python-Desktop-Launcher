@@ -1,5 +1,5 @@
 <Window x:Class="ProjectLauncher.Desktop.MainWindow"
- xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:loc="clr-namespace:ProjectLauncher.Desktop.Services" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
  xmlns:services="clr-namespace:ProjectLauncher.Desktop.Services"
  xmlns:controls="clr-namespace:ProjectLauncher.Desktop.Controls"
@@ -13,11 +13,11 @@
    <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="6,0,0,0"/><Setter Property="FontSize" Value="13"/>
    <Setter Property="Content" Value="▶"/><Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/><Setter Property="Background" Value="{DynamicResource SuccessSoftBrush}"/>
    <Setter Property="ContentTemplate"><Setter.Value><DataTemplate><TextBlock Text="{Binding}" FontSize="15" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/></DataTemplate></Setter.Value></Setter>
-   <Setter Property="ToolTip" Value="开始动作"/><Setter Property="AutomationProperties.Name" Value="开始动作"/>
+   <Setter Property="ToolTip" Value="{loc:LocalizedText Ui.000}"/><Setter Property="AutomationProperties.Name" Value="{loc:LocalizedText Ui.000}"/>
    <Setter Property="IsEnabled" Value="{Binding DataContext.CanRun, RelativeSource={RelativeSource AncestorType=Window}}"/>
    <Style.Triggers><DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
     <Setter Property="Content" Value="●"/><Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/><Setter Property="Background" Value="{DynamicResource DangerSoftBrush}"/>
-    <Setter Property="ToolTip" Value="停止动作"/><Setter Property="AutomationProperties.Name" Value="停止动作"/><Setter Property="IsEnabled" Value="True"/>
+    <Setter Property="ToolTip" Value="{loc:LocalizedText Ui.001}"/><Setter Property="AutomationProperties.Name" Value="{loc:LocalizedText Ui.001}"/><Setter Property="IsEnabled" Value="True"/>
    </DataTrigger></Style.Triggers>
   </Style>
  </Window.Resources>
@@ -33,9 +33,9 @@
      <TextBlock Text="{Binding ProjectName}" FontSize="12" VerticalAlignment="Center"/>
     </StackPanel>
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-     <Button Content="—" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="最小化" Click="Minimize_Click"/>
-     <Button Content="□" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="最大化 / 还原" Click="Maximize_Click"/>
-     <Button Content="✕" Width="45" Height="34" Padding="0" Margin="0,0,7,0" Style="{StaticResource TextButton}" ToolTip="关闭" Click="Close_Click"/>
+     <Button Content="—" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="{loc:LocalizedText Ui.002}" Click="Minimize_Click"/>
+     <Button Content="□" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="{loc:LocalizedText Ui.003}" Click="Maximize_Click"/>
+     <Button Content="✕" Width="45" Height="34" Padding="0" Margin="0,0,7,0" Style="{StaticResource TextButton}" ToolTip="{loc:LocalizedText Ui.004}" Click="Close_Click"/>
     </StackPanel>
    </Grid>
    <Grid Grid.Row="1">
@@ -49,13 +49,13 @@
       </StackPanel>
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel x:Name="Navigation">
-       <TextBlock Text="工作空间" Style="{StaticResource Micro}" Margin="13,0,0,10"/>
-       <ToggleButton x:Name="RunNav" Style="{StaticResource ActionGroupButton}" IsChecked="True" Click="RunGroup_Click" AutomationProperties.Name="展开或收起启动动作">
-        <DockPanel><TextBlock Text="{Binding Config.Actions.Count}" DockPanel.Dock="Right" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="8,0"/><TextBlock Text="运行项目" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/></DockPanel>
+       <TextBlock Text="{loc:LocalizedText Ui.005}" Style="{StaticResource Micro}" Margin="13,0,0,10"/>
+       <ToggleButton x:Name="RunNav" Style="{StaticResource ActionGroupButton}" IsChecked="True" Click="RunGroup_Click" AutomationProperties.Name="{loc:LocalizedText Ui.006}">
+        <DockPanel><TextBlock Text="{Binding Config.Actions.Count}" DockPanel.Dock="Right" FontSize="11" Foreground="{DynamicResource MutedTextBrush}" Margin="8,0"/><TextBlock Text="{loc:LocalizedText Ui.007}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/></DockPanel>
        </ToggleButton>
        <ListBox x:Name="ActionList" ItemsSource="{Binding Config.Actions}" SelectionChanged="Action_Selected"
                 Visibility="{Binding IsChecked, ElementName=RunNav, Converter={StaticResource BoolVisibility}}" Margin="16,2,0,10" MaxHeight="260"
-                ItemContainerStyle="{StaticResource ActionNavItem}" AutomationProperties.Name="启动动作">
+                ItemContainerStyle="{StaticResource ActionNavItem}" AutomationProperties.Name="{loc:LocalizedText Ui.008}">
         <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
          <TextBlock Text="{Binding}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding}" FontSize="12" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"/>
          <Button x:Name="ActionQuickButton" Grid.Column="1" Style="{StaticResource ActionQuickControl}" Click="ActionQuick_Click" ToolTipService.ShowOnDisabled="True">
@@ -63,24 +63,21 @@
          </Button>
         </Grid></DataTemplate></ListBox.ItemTemplate>
        </ListBox>
-       <RadioButton x:Name="TerminalNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="terminal" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconTerminal}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="项目终端" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
-       <RadioButton x:Name="EnvironmentNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="environment" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconEnvironment}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="环境管理" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
-       <RadioButton x:Name="SettingsNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="settings" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconSettings}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="项目设置" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="TerminalNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="terminal" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconTerminal}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="{loc:LocalizedText Ui.009}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="EnvironmentNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="environment" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconEnvironment}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="{loc:LocalizedText Ui.010}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="SettingsNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="settings" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconSettings}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="{loc:LocalizedText Ui.011}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
       </StackPanel>
       </ScrollViewer>
       <StackPanel Grid.Row="3">
-       <Border Background="{DynamicResource PanelBackground}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="13" Margin="0,0,0,14">
-        <StackPanel>
-         <TextBlock Text="当前项目" Style="{StaticResource Micro}"/>
-         <TextBlock Text="{Binding ProjectName}" FontWeight="SemiBold" Margin="0,7,0,6" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectRoot}"/>
-         <TextBlock Text="{Binding RuntimeLabel}" Style="{StaticResource Micro}" TextTrimming="CharacterEllipsis"/>
-         <Button Content="打开项目目录  ↗" Style="{StaticResource TextButton}" FontSize="11" Padding="0,8,0,0" HorizontalAlignment="Left" Click="OpenFolder_Click"/>
-        </StackPanel>
-       </Border>
-       <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-        <TextBlock Text="本地工作空间" Style="{StaticResource Micro}" VerticalAlignment="Center" Margin="8,0,0,0"/>
-        <Button Grid.Column="1" Content="◐" Width="32" Padding="0" Style="{StaticResource TextButton}" Click="Theme_Click" ToolTip="切换深色 / 浅色"/>
-        <Button Grid.Column="2" Content="?" Width="26" Padding="0" Style="{StaticResource TextButton}" Click="About_Click" ToolTip="关于与快捷键"/>
+       <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <ComboBox x:Name="LanguageSelector" MinHeight="30" Padding="6,3" FontSize="11" SelectedValuePath="Tag"
+          SelectedValue="{Binding Language, Source={x:Static services:LocalizationService.Current}, Mode=TwoWay}"
+          ToolTip="Language / 语言" AutomationProperties.Name="Language / 语言">
+         <ComboBoxItem Tag="zh-CN" Content="简体中文"/><ComboBoxItem Tag="en-US" Content="English"/>
+        </ComboBox>
+        <Button Grid.Column="1" Content="↗" Width="26" Padding="0" Style="{StaticResource TextButton}" Click="OpenFolder_Click" ToolTip="{loc:LocalizedText Ui.013}" AutomationProperties.Name="{loc:LocalizedText Ui.013}"/>
+        <Button Grid.Column="2" Content="◐" Width="26" Padding="0" Style="{StaticResource TextButton}" Click="Theme_Click" ToolTip="{loc:LocalizedText Ui.015}"/>
+        <Button Grid.Column="3" Content="?" Width="22" Padding="0" Style="{StaticResource TextButton}" Click="About_Click" ToolTip="{loc:LocalizedText Ui.016}"/>
        </Grid>
       </StackPanel>
      </Grid>
@@ -95,7 +92,7 @@
     <Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="204"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
      <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,8,0"/><TextBlock x:Name="SidebarProjectVersion" Text="{Binding ProjectVersion}" FontSize="10.5" MaxWidth="180" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectVersion}" Foreground="{DynamicResource MutedTextBrush}"/></StackPanel>
      <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="10.5" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-     <TextBlock Grid.Column="2" FontSize="11" VerticalAlignment="Center"><Hyperlink x:Name="OfficialSiteLink" NavigateUri="https://github.com/JonGates/Python-Desktop-Launcher" RequestNavigate="OfficialSite_RequestNavigate" Foreground="{DynamicResource MutedTextBrush}" ToolTip="打开项目 GitHub 官网">Python-Desktop-Launcher 官网</Hyperlink></TextBlock>
+     <TextBlock Grid.Column="2" FontSize="11" VerticalAlignment="Center"><Hyperlink x:Name="OfficialSiteLink" NavigateUri="https://github.com/JonGates/Python-Desktop-Launcher" RequestNavigate="OfficialSite_RequestNavigate" Foreground="{DynamicResource MutedTextBrush}" ToolTip="{loc:LocalizedText Ui.017}"><Run Text="{loc:LocalizedText Common.Website}"/></Hyperlink></TextBlock>
     </Grid>
    </Border>
   </Grid>

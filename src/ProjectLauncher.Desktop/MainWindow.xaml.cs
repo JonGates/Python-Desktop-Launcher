@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     {
         e.Handled = true;
         try { Process.Start(new ProcessStartInfo("https://github.com/JonGates/Python-Desktop-Launcher") { UseShellExecute = true }); }
-        catch (Exception ex) { Shell.Notify("无法打开官网：" + ex.Message); }
+        catch (Exception ex) { Shell.Notify(L.Text("Text.014") + ex.Message); }
     }
     private RunView _run = null!;
     private TerminalView _terminal = null!;
@@ -40,6 +40,7 @@ public partial class MainWindow : Window
         Shell.NavigationRequested += ShowPage;
         Shell.ConfigurationChanged += ConfigurationChanged;
         _ready = true; ShowPage("run");
+        if (LocalizationService.Current.PreferenceError is string error) Shell.Notify(error);
     }
     private void CreateViews()
     {
@@ -104,7 +105,7 @@ public partial class MainWindow : Window
         if (Shell.Busy)
         {
             if (Shell.ActiveActionId != action.Id) return;
-            if (Dialogs.Confirm(this, "停止当前任务？", "这会终止任务及其归属进程，不是暂停。正在写入的文件可能不完整。", "停止任务", true)
+            if (Dialogs.Confirm(this, L.Text("Text.015"), L.Text("Text.016"), L.Text("Text.017"), true)
                 && Shell.Busy && Shell.ActiveActionId == action.Id) Shell.Stop();
             return;
         }
@@ -119,9 +120,9 @@ public partial class MainWindow : Window
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     { try { Process.Start(new ProcessStartInfo(Shell.ProjectRoot) { UseShellExecute = true }); } catch (Exception ex) { Shell.Notify(ex.Message); } }
     private void DismissNotice_Click(object sender, RoutedEventArgs e) => Shell.DismissNotification();
-    private void NoticeDetail_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, "详细信息", Shell.NotificationDetail);
+    private void NoticeDetail_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, L.Text("Text.018"), Shell.NotificationDetail);
     private void About_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, "Project Launcher 2.0 · C# Preview",
-        "原生 WPF 桌面启动器 · .NET 10\n\n一个项目，一份 launcher.yaml。界面与 Python 业务环境分离。\n\n设置：可视化参数 / 启动 argv / 完整 YAML。\n终端：ConPTY + 原生基础 VT 渲染，不依赖浏览器。\n\n快捷键\nCtrl + ,    项目设置（终端内不拦截）\nCtrl + Shift + 1 / 2 / 3 / 4    切换四个页面（终端内不拦截）\n终端 Ctrl + Shift + C / V    复制 / 粘贴\n终端 Ctrl + 鼠标滚轮    字号\n\n内置终端不承诺兼容所有全屏 TUI、复杂 emoji 和鼠标协议；可使用「系统终端」作为替代。\n\n许可证：MIT。第三方组件遵循各自许可证。\n源码预览版：请先完成 Windows 构建及验收，再用于正式业务。" );
+        L.Text("Text.019") );
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (_page == "terminal") return; // Do not steal shell / editor shortcuts.
@@ -136,8 +137,8 @@ public partial class MainWindow : Window
     {
         if (_allowClose) return;
         e.Cancel = true; if (_closing) return;
-        if (_settings.HasUnsavedChanges && !Dialogs.Confirm(this, "有未保存的项目设置", "关闭窗口会丢弃设置页的未保存草稿。", "放弃草稿并关闭")) return;
-        if ((Shell.Busy || Shell.OpenTerminalCount > 0) && !Dialogs.Confirm(this, "停止运行并关闭？", "仍有任务或项目终端运行中。关闭启动器将终止由本窗口管理的进程，未完成输出可能不完整。", "停止并关闭", true)) return;
+        if (_settings.HasUnsavedChanges && !Dialogs.Confirm(this, L.Text("Text.020"), L.Text("Text.021"), L.Text("Text.022"))) return;
+        if ((Shell.Busy || Shell.OpenTerminalCount > 0) && !Dialogs.Confirm(this, L.Text("Text.023"), L.Text("Text.024"), L.Text("Text.025"), true)) return;
         _closing = true; IsEnabled = false;
         try
         {

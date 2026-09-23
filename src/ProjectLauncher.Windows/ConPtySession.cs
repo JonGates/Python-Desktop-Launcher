@@ -30,11 +30,11 @@ public sealed class ConPtySession : IAsyncDisposable
 
     public void Start(IReadOnlyList<string> command, string workingDirectory, IReadOnlyDictionary<string, string> environment, int columns = 100, int rows = 30)
     {
-        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) throw new ConfigException("内置终端需要支持 ConPTY 的 Windows（Windows 10 1809 或更高；建议 Windows 11）。");
-        if (command.Count == 0) throw new ConfigException("终端命令不能为空。");
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.12"));
+        if (command.Count == 0) throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.13"));
         lock (_lifecycle)
         {
-            if (_started || _closing) throw new InvalidOperationException("终端会话不能重复启动，请新建标签页。");
+            if (_started || _closing) throw new InvalidOperationException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.14"));
             IntPtr inputRead = IntPtr.Zero, inputWrite = IntPtr.Zero, outputRead = IntPtr.Zero, outputWrite = IntPtr.Zero;
             IntPtr attributes = IntPtr.Zero, environmentBlock = IntPtr.Zero;
             bool attributeListInitialized = false;
@@ -58,7 +58,7 @@ public sealed class ConPtySession : IAsyncDisposable
                 var block = string.Join('\0', environment.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase).Select(x => x.Key + "=" + x.Value)) + "\0\0";
                 environmentBlock = Marshal.StringToHGlobalUni(block);
                 string executable = command[0];
-                if (!CommandBuilder.IsExplicitPath(executable)) executable = ProjectEnvironment.FindExecutable(executable, environment) ?? throw new ConfigException("找不到终端程序：" + executable);
+                if (!CommandBuilder.IsExplicitPath(executable)) executable = ProjectEnvironment.FindExecutable(executable, environment) ?? throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.15") + executable);
                 var args = command.ToList(); args[0] = executable;
                 if (!NativeMethods.CreateProcess(executable, new StringBuilder(WindowsArguments.Join(args)), IntPtr.Zero, IntPtr.Zero, false,
                     NativeMethods.ExtendedStartupInfoPresent | NativeMethods.CreateUnicodeEnvironment | NativeMethods.CreateSuspended,
@@ -108,7 +108,7 @@ public sealed class ConPtySession : IAsyncDisposable
             }
         }
         catch (Exception e) when (e is IOException or ObjectDisposedException)
-        { if (!_closing) Diagnostic?.Invoke("终端输出管道已关闭：" + e.Message); }
+        { if (!_closing) Diagnostic?.Invoke(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.16") + e.Message); }
     }
     private void WriteLoop()
     {
@@ -123,7 +123,7 @@ public sealed class ConPtySession : IAsyncDisposable
             }
         }
         catch (Exception e) when (e is IOException or ObjectDisposedException)
-        { if (!_closing) Diagnostic?.Invoke("终端输入管道已关闭：" + e.Message); }
+        { if (!_closing) Diagnostic?.Invoke(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.17") + e.Message); }
     }
     private void MonitorLoop()
     {
@@ -137,8 +137,8 @@ public sealed class ConPtySession : IAsyncDisposable
     public void Write(string text)
     {
         if (!IsRunning) return;
-        if (text.Length > 1_048_576) throw new ConfigException("单次终端输入超过 1 MB。");
-        try { if (!_input.TryAdd(text)) throw new ConfigException("终端输入缓冲区繁忙，请稍后重试。"); }
+        if (text.Length > 1_048_576) throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.18"));
+        try { if (!_input.TryAdd(text)) throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.19")); }
         catch (InvalidOperationException) { if (!_closing) throw; }
     }
     public void Resize(int columns, int rows)

@@ -65,7 +65,7 @@ public static class ActionEditing
     }
     public static ActionDefinition AddAction(LauncherConfig config)
     {
-        var action = new ActionDefinition { Id = Unique("action", config.Actions.Select(a => a.Id)), Label = "新的启动动作", Argv = ["python", ""], Parameters = [] };
+        var action = new ActionDefinition { Id = Unique("action", config.Actions.Select(a => a.Id)), Label = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.4"), Argv = ["python", ""], Parameters = [] };
         config.Actions.Add(action); return action;
     }
     public static void ExplicitMembership(LauncherConfig config, bool confirmed)
@@ -78,7 +78,7 @@ public static class ActionEditing
     {
         ExplicitMembership(config, confirmed);
         var name = Unique("parameter", config.Parameters.Select(p => p.Name));
-        var p = new ParameterDefinition { Name = name, Label = "新的参数", Argument = "--" + name };
+        var p = new ParameterDefinition { Name = name, Label = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.5"), Argument = "--" + name };
         config.Parameters.Add(p); action.Parameters!.Add(name); return p;
     }
     public static string CommandKind(ActionDefinition action)

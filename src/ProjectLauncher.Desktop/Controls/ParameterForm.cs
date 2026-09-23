@@ -1,3 +1,4 @@
+using ProjectLauncher.Desktop.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,7 +43,7 @@ public sealed class ParameterForm : UserControl
         _updating = true; _config = config; _allValues = CommandBuilder.EffectiveValues(config, values); _projectRoot = projectRoot;
         _fields.Clear(); _root.Children.Clear();
         foreach (var parameter in CommandBuilder.SelectedParameters(config, action)) CreateField(parameter);
-        if (_fields.Count == 0) _root.Children.Add(new TextBlock { Text = "此动作无需额外参数，可直接启动。\n需要调整入口或添加参数时，点击「配置动作」。", Style = (Style)FindResource("Hint"), Margin = new Thickness(2, 10, 2, 14) });
+        if (_fields.Count == 0) _root.Children.Add(new TextBlock { Text = "", Style = (Style)FindResource("Hint"), Margin = new Thickness(2, 10, 2, 14) }.Localize(TextBlock.TextProperty, "Text.099"));
         _updating = false; UpdateVisibility();
     }
     private void CreateField(ParameterDefinition p)
@@ -57,7 +58,7 @@ public sealed class ParameterForm : UserControl
         Func<object?> read; Action<object?> write;
         if (p.Type == "boolean")
         {
-            var check = new CheckBox { Content = "启用", IsChecked = TryBool(initial), Margin = new Thickness(0, 5, 0, 5) };
+            var check = new CheckBox { Content = "", IsChecked = TryBool(initial), Margin = new Thickness(0, 5, 0, 5) }.Localize(ContentControl.ContentProperty, "Text.100");
             check.Checked += Changed; check.Unchecked += Changed; panel.Children.Add(check);
             read = () => check.IsChecked == true; write = v => check.IsChecked = TryBool(v);
         }
@@ -82,7 +83,7 @@ public sealed class ParameterForm : UserControl
             {
                 var row = new Grid(); row.ColumnDefinitions.Add(new()); row.ColumnDefinitions.Add(new() { Width = GridLength.Auto });
                 row.Children.Add(text);
-                var browse = new Button { Content = "浏览", Margin = new Thickness(8, 0, 0, 0), MinWidth = 65, Padding = new Thickness(12, 8, 12, 8) };
+                var browse = new Button { Content = "", Margin = new Thickness(8, 0, 0, 0), MinWidth = 65, Padding = new Thickness(12, 8, 12, 8) }.Localize(ContentControl.ContentProperty, "Text.101");
                 browse.Click += (_, _) => Browse(p, text); Grid.SetColumn(browse, 1); row.Children.Add(browse); panel.Children.Add(row);
                 text.AllowDrop = true;
                 text.PreviewDragOver += (_, e) => { e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None; e.Handled = true; };
@@ -92,8 +93,9 @@ public sealed class ParameterForm : UserControl
             read = () => text.Text; write = v => text.Text = ValueCodec.Text(v);
         }
         var description = p.Description;
-        if (p.IsSecret) description += (description.Length > 0 ? "\n" : "") + "敏感值不会保存到上次参数或预设；建议通过环境变量传递。";
-        if (description.Length > 0) panel.Children.Add(new TextBlock { Text = description, Style = (Style)FindResource("Hint"), Margin = new Thickness(0, 6, 0, 0) });
+        if (p.IsSecret) description += (description.Length > 0 ? "\n" : "") + L.Text("Text.102");
+        if (description.Length > 0) panel.Children.Add(new TextBlock { Style = (Style)FindResource("Hint"), Margin = new Thickness(0, 6, 0, 0) }
+            .Dynamic(TextBlock.TextProperty, () => p.Description + (p.IsSecret ? (p.Description.Length > 0 ? "\n" : "") + L.Text("Text.102") : "")));
         _fields[p.Name] = new(p, panel, read, write); _root.Children.Add(panel);
     }
     private void Browse(ParameterDefinition p, TextBox target)

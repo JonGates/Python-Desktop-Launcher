@@ -17,11 +17,16 @@ public partial class App : Application
     private bool _smokeMode;
     protected override void OnStartup(StartupEventArgs e)
     {
+        var smokeIndex = Array.IndexOf(e.Args, "--ui-smoke-test");
+        var preferencePath = smokeIndex >= 0 && smokeIndex + 1 < e.Args.Length
+            ? Path.Combine(Path.GetFullPath(e.Args[smokeIndex + 1]), "language-preferences.json")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ProjectLauncher", "preferences.json");
+        LocalizationService.Current.Initialize(preferencePath, smokeIndex >= 0 ? "zh-CN" : null);
         base.OnStartup(e);
         DispatcherUnhandledException += (_, args) =>
         {
             WriteCrash(args.Exception); args.Handled = true;
-            MessageBox.Show("启动器遇到未处理的错误。\n\n" + args.Exception.Message + "\n\n诊断记录位于 %LOCALAPPDATA%\\ProjectLauncher\\crashes。请附上记录反馈；任务可能未完成。", "Project Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(L.Text("Text.000") + args.Exception.Message + L.Text("Text.001"), "Project Launcher", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         };
         TaskScheduler.UnobservedTaskException += (_, args) => { WriteCrash(args.Exception); args.SetObserved(); };
@@ -34,16 +39,16 @@ public partial class App : Application
                 switch (e.Args[i])
                 {
                     case "--project": case "--config":
-                        if (++i >= e.Args.Length) throw new ConfigException("--project 后需要项目目录或配置文件路径。"); location = e.Args[i]; break;
+                        if (++i >= e.Args.Length) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Text.002", [])); location = e.Args[i]; break;
                     case "--ui-smoke-test":
-                        if (++i >= e.Args.Length) throw new ConfigException("--ui-smoke-test 后需要截图与报告输出目录。"); screenshots = e.Args[i]; _smokeMode = true; break;
-                    default: throw new ConfigException("未知启动参数：" + e.Args[i]);
+                        if (++i >= e.Args.Length) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Text.003", [])); screenshots = e.Args[i]; _smokeMode = true; break;
+                    default: throw new ConfigException(L.Text("Text.004") + e.Args[i]);
                 }
             }
             var path = Path.GetFullPath(Directory.Exists(location) ? Path.Combine(location, "launcher.yaml") : location);
             if (!File.Exists(path))
             {
-                if (_smokeMode) throw new ConfigException("UI 测试要求已有 launcher.yaml。");
+                if (_smokeMode) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Text.005", []));
                 if (!CreateInitialConfig(ref path)) { Shutdown(); return; }
             }
             ConfigSnapshot? snapshot = null;
@@ -52,9 +57,9 @@ public partial class App : Application
                 try { snapshot = ConfigStore.Load(path); _ = new ProjectEnvironment(snapshot.Config, snapshot.Path); }
                 catch (Exception ex) when (!_smokeMode)
                 {
-                    if (!Dialogs.Confirm(null, "配置无法加载", path + "\n\n" + ex.Message + "\n\n可在文本编辑器中修复 launcher.yaml；本窗口会保留原文件，不自动重置。", "打开配置修复")) { Shutdown(1); return; }
+                    if (!Dialogs.Confirm(null, L.Text("Text.006"), path + "\n\n" + ex.Message + L.Text("Text.007"), L.Text("Text.008"))) { Shutdown(1); return; }
                     Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { path }, UseShellExecute = false });
-                    if (!Dialogs.Confirm(null, "修复后重新读取", "请保存文本编辑器中的修改，再点击重新读取。", "重新读取")) { Shutdown(1); return; }
+                    if (!Dialogs.Confirm(null, L.Text("Text.009"), L.Text("Text.010"), L.Text("Text.011"))) { Shutdown(1); return; }
                 }
             }
             var window = OpenProject(snapshot);
@@ -73,7 +78,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             WriteCrash(ex);
-            if (!_smokeMode) MessageBox.Show(ex.Message, "Project Launcher 无法启动", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (!_smokeMode) MessageBox.Show(ex.Message, L.Text("Text.012"), MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }
@@ -82,7 +87,7 @@ public partial class App : Application
         var folder = Path.GetDirectoryName(path)!;
         if (!Directory.Exists(folder))
         {
-            var choose = new OpenFolderDialog { Title = "选择已有 Python 项目目录" };
+            var choose = new OpenFolderDialog { Title = L.Text("Text.013") };
             if (choose.ShowDialog() != true) return false;
             folder = choose.FolderName; path = Path.Combine(folder, "launcher.yaml");
             if (File.Exists(path)) return true;

@@ -149,7 +149,7 @@ public sealed class ProjectEnvironment
         using var runner = new ProcessRunner();
         var output = new System.Text.StringBuilder(); var gate = new object();
         runner.Output += text => { lock (gate) output.Append(text); };
-        var result = await runner.RunAsync(new([python, "-I", "-c", script], new(), "检查项目解释器", [], 20), Root, ExecutionEnvironment(), cancellation);
+        var result = await runner.RunAsync(new([python, "-I", "-c", script], new(), ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.3"), [], 20), Root, ExecutionEnvironment(), cancellation);
         if (result.ExitCode != 0 || result.Cancelled || result.TimedOut) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.13", [output]));
         var json = output.ToString().Split('\n').LastOrDefault(line => line.TrimStart().StartsWith('{'));
         if (json is null) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.14", []));

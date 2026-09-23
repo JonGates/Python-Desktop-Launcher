@@ -37,6 +37,12 @@ internal static class ActionQuickControlSmoke
             window.ShowPage("terminal"); await Idle(window);
             ButtonFor("service").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             await Until(() => window.Shell.LogText.Contains("VALUE=quick-action-current-value") && window.Shell.Busy);
+            var logBeforeLanguage = window.Shell.LogText;
+            LocalizationService.Current.SetLanguage("en-US"); await Idle(window);
+            if (!window.Shell.Busy || window.Shell.ActiveActionId != "service" || window.Shell.LogText != logBeforeLanguage)
+                throw new Exception("Language switch interrupted job or changed business output.");
+            if (!window.Shell.Status.StartsWith("Running")) throw new Exception("Running status did not translate live.");
+            LocalizationService.Current.SetLanguage("zh-CN"); await Idle(window);
             await Idle(window);
             if (!ButtonFor("service").IsEnabled || ButtonFor("app").IsEnabled) throw new Exception($"Running action controls mismatch: busy={window.Shell.Busy}, active={window.Shell.ActiveActionId}, service enabled={ButtonFor("service").IsEnabled}, tag={ButtonFor("service").Tag}, content={ButtonFor("service").Content}, app enabled={ButtonFor("app").IsEnabled}.");
             if (!Equals(ButtonFor("service").Content, "●")) throw new Exception("Running action lacks stop indicator.");
@@ -59,9 +65,21 @@ internal static class ActionQuickControlSmoke
             ButtonFor("app").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             await Until(() => !window.Shell.Busy && window.Shell.History.Any(h => h.ActionId == "app"));
             if (window.Shell.History.First().Status != "成功") throw new Exception("Natural completion failed.");
+            window.ShowPage("terminal"); await Idle(window);
+            Descendants<Button>(window.TerminalPage).Single(b => Equals(b.Content, "＋ CMD")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            await Until(() => window.TerminalPage.Tabs.Count == 1 && !window.TerminalPage.Tabs[0].Starting);
+            var tab = window.TerminalPage.Tabs[0];
+            tab.Session.Write("set LAUNCHER_LANGUAGE_PROBE=retained\r");
+            await Until(() => tab.Control.Screen.PlainText(true).Contains("LAUNCHER_LANGUAGE_PROBE=retained"));
+            LocalizationService.Current.SetLanguage("en-US"); await Idle(window);
+            if (!ReferenceEquals(tab, window.TerminalPage.Tabs.Single()) || !tab.Session.IsRunning) throw new Exception("Language switch replaced terminal session.");
+            tab.Session.Write("echo PERSISTED_%LAUNCHER_LANGUAGE_PROBE%\r");
+            await Until(() => tab.Control.Screen.PlainText(true).Contains("PERSISTED_retained"));
+            LocalizationService.Current.SetLanguage("zh-CN"); await window.TerminalPage.CloseAllAsync();
+            results.Add("PASS language switch preserves running job output and live ConPTY environment state");
             results.Add("PASS sidebar start uses current parameters, stop/cancel from terminal, per-action busy guard and completion reset");
         }
-        finally { if (window.Shell.Busy) { window.Shell.Stop(); await Until(() => !window.Shell.Busy); } window.Close(); await Idle(window); }
+        finally { LocalizationService.Current.SetLanguage("zh-CN"); if (window.Shell.Busy) { window.Shell.Stop(); await Until(() => !window.Shell.Busy); } await window.TerminalPage.CloseAllAsync(); window.Close(); await Idle(window); }
     }
     private static void ConfirmStop(Window owner, Button button, bool accept)
     {

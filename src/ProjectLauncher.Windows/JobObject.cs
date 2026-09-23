@@ -10,7 +10,7 @@ public sealed class JobObject : IProcessLifetime
     private readonly SafeKernelHandle _handle;
     public JobObject()
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Job Object 仅适用于 Windows。");
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.11"));
         _handle = NativeMethods.CreateJobObject(IntPtr.Zero, null);
         if (_handle.IsInvalid) throw new Win32Exception(Marshal.GetLastWin32Error());
         var limits = new NativeMethods.ExtendedLimitInformation

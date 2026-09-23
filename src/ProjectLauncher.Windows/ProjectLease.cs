@@ -22,7 +22,7 @@ public sealed class ProjectLease : IDisposable
             {
                 mutex = new Mutex(false, name);
                 try { acquired = mutex.WaitOne(0); } catch (AbandonedMutexException) { acquired = true; }
-                if (!acquired) throw new ConfigException("该项目已由其他 GUI / CLI 启动器占用。请先关闭对应会话，避免并发修改项目环境。");
+                if (!acquired) throw new ConfigException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.20"));
                 ready.SetResult(); _release.Wait();
             }
             catch (Exception ex) { ready.TrySetException(ex); }

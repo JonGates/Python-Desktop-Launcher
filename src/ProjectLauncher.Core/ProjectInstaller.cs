@@ -12,10 +12,10 @@ public static class ProjectInstaller
             File.Exists(Path.Combine(directory, "uv.lock")) && File.Exists(Path.Combine(directory, "pyproject.toml")) ? "uv" : "venv";
         return new LauncherConfig
         {
-            App = new() { Name = new DirectoryInfo(directory).Name, Description = "在项目自己的 Python 环境中运行。请在项目设置中核对真实入口和参数。" },
+            App = new() { Name = new DirectoryInfo(directory).Name, Description = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.9") },
             Runtime = new() { Mode = mode, Venv = environment is null ? ".venv" : Path.GetRelativePath(directory, environment),
                 Requirements = mode == "venv" && File.Exists(Path.Combine(directory, "requirements.txt")) ? "requirements.txt" : "" },
-            Actions = [new() { Id = "run", Label = "运行项目", Argv = ["python", entry], Parameters = [] }], Parameters = []
+            Actions = [new() { Id = "run", Label = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.10"), Argv = ["python", entry], Parameters = [] }], Parameters = []
         };
     }
 

@@ -43,9 +43,9 @@ public sealed class TerminalControl : FrameworkElement
         GotKeyboardFocus += (_, _) => { _cursorLit = true; InvalidateVisual(); };
         LostKeyboardFocus += (_, _) => InvalidateVisual();
         var menu = new System.Windows.Controls.ContextMenu();
-        AddMenu(menu, "复制选中内容 / 当前屏幕", Copy);
-        AddMenu(menu, "粘贴", Paste);
-        AddMenu(menu, "回到最新输出", () => { _scrollOffset = 0; InvalidateVisual(); });
+        AddMenu(menu, L.Text("Text.103"), Copy);
+        AddMenu(menu, L.Text("Ui.102"), Paste);
+        AddMenu(menu, L.Text("Text.105"), () => { _scrollOffset = 0; InvalidateVisual(); });
         System.Windows.Controls.ContextMenuService.SetContextMenu(this, menu);
     }
     private static void AddMenu(System.Windows.Controls.ContextMenu menu, string text, Action action)
@@ -154,9 +154,9 @@ public sealed class TerminalControl : FrameworkElement
         {
             if (!Clipboard.ContainsText()) return;
             string text = Clipboard.GetText();
-            if (text.Length > 1_048_576) throw new ConfigException("粘贴内容超过 1 MB。");
+            if (text.Length > 1_048_576) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Text.106", []));
             if (text.Contains('\n') || text.Contains('\r'))
-                if (!Dialogs.Confirm(Window.GetWindow(this), "粘贴多行终端输入？", "多行文本可能包含可立即执行的命令。请确认剪贴板内容可信。", "粘贴")) return;
+                if (!Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.107"), L.Text("Text.108"), L.Text("Ui.102"))) return;
             text = new string(text.Where(c => c is '\r' or '\n' or '\t' || c >= ' ' && c != '\u007f').ToArray());
             text = text.Replace("\r\n", "\n");
             Send(Screen.BracketedPaste ? "\u001b[200~" + text + "\u001b[201~" : text.Replace('\n', '\r'));

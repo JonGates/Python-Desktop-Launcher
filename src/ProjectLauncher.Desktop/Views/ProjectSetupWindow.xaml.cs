@@ -1,3 +1,4 @@
+using ProjectLauncher.Desktop.Services;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -22,12 +23,12 @@ public partial class ProjectSetupWindow : Window
         var environments = ProjectSetup.FindEnvironments(_project);
         foreach (var directory in environments)
             EnvironmentBox.Items.Add(new EnvironmentChoice(Path.GetRelativePath(_project, directory), directory));
-        EnvironmentBox.Items.Add(new EnvironmentChoice("稍后在环境管理页创建或设置", null));
+        EnvironmentBox.Items.Add(new EnvironmentChoice(L.Text("Text.158"), null));
         DiscoveryStatus.Text = environments.Count switch
         {
-            0 => "未发现完整的虚拟环境。可以选择已有环境目录，或先生成配置。",
-            1 => "发现 1 个虚拟环境，已为你选中。请确认目录。",
-            _ => $"发现 {environments.Count} 个虚拟环境，请选择此项目使用的环境。"
+            0 => L.Text("Text.159"),
+            1 => L.Text("Text.160"),
+            _ => L.Text("Setup.Discovered", environments.Count)
         };
         EnvironmentBox.SelectedIndex = environments.Count <= 1 ? 0 : -1;
     }
@@ -35,16 +36,16 @@ public partial class ProjectSetupWindow : Window
     private void Environment_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (EnvironmentPath is null) return;
-        EnvironmentPath.Text = (EnvironmentBox.SelectedItem as EnvironmentChoice)?.Directory ?? "配置可先保存，运行任务前需准备项目环境。";
+        EnvironmentPath.Text = (EnvironmentBox.SelectedItem as EnvironmentChoice)?.Directory ?? L.Text("Text.161");
     }
 
     private void BrowseEnvironment_Click(object sender, RoutedEventArgs e)
     {
-        var picker = new OpenFolderDialog { Title = "选择虚拟环境根目录（含 pyvenv.cfg）", InitialDirectory = _project };
+        var picker = new OpenFolderDialog { Title = L.Text("Text.162"), InitialDirectory = _project };
         if (picker.ShowDialog(this) != true) return;
         if (!ProjectSetup.IsEnvironment(picker.FolderName))
         {
-            ErrorText.Text = "此目录缺少 pyvenv.cfg 或环境内的 Python 解释器。请选择虚拟环境根目录，而不是 Scripts 文件夹。"; return;
+            ErrorText.Text = L.Text("Text.163"); return;
         }
         var choice = new EnvironmentChoice(picker.FolderName, picker.FolderName);
         EnvironmentBox.Items.Add(choice); EnvironmentBox.SelectedItem = choice; ErrorText.Text = "";
@@ -54,7 +55,7 @@ public partial class ProjectSetupWindow : Window
     {
         if (EnvironmentBox.SelectedItem is not EnvironmentChoice choice)
         {
-            ErrorText.Text = "请选择一个环境，或选择稍后设置。"; return;
+            ErrorText.Text = L.Text("Text.164"); return;
         }
         try
         {

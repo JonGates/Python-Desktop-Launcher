@@ -31,7 +31,7 @@ public partial class SettingsView : UserControl
     private void MarkDirty()
     {
         if (_loading) return;
-        HasUnsavedChanges = true; DirtyLabel.Text = "● 草稿未保存 · 保存成功后查看该动作";
+        HasUnsavedChanges = true; DirtyLabel.Localize(TextBlock.TextProperty, "Text.184");
     }
     private void LoadDraft(LauncherConfig config)
     {
@@ -44,28 +44,28 @@ public partial class SettingsView : UserControl
         _workspace = new ActionWorkspace(_draft, Path.GetDirectoryName(_shell.Snapshot.Path)!, MarkDirty); ActionWorkspaceHost.Content = _workspace;
         _workspace.ValidationNotice += message => {
             if (message is null) _shell.ClearNotification("action-editor");
-            else _shell.Notify(message, "action-editor");
+            else _shell.NotifyLocalized(() => message.Message, "action-editor");
         };
         YamlBox.Text = ConfigStore.Serialize(_draft);
-        HasUnsavedChanges = false; DirtyLabel.Text = "保存时校验配置并保留 .bak 备份"; _loading = false;
+        HasUnsavedChanges = false; DirtyLabel.Localize(TextBlock.TextProperty, "Ui.097"); _loading = false;
     }
     private void CommitEditors()
     {
         Dictionary<string, string> env;
         try { env = string.IsNullOrWhiteSpace(EnvBox.Text) ? new() : JsonSerializer.Deserialize<Dictionary<string, string>>(EnvBox.Text) ?? new(); }
-        catch (JsonException e) { EnvBox.Focus(); throw new ConfigException("附加环境变量需要 JSON 字符串映射：" + e.Message); }
+        catch (JsonException e) { EnvBox.Focus(); throw new ConfigException(L.Text("Text.186") + e.Message); }
         _draft.App.Name = NameBox.Text.Trim(); _draft.App.Description = DescriptionBox.Text; _draft.App.Version = VersionBox.Text.Trim(); _draft.App.OutputDir = OutputBox.Text.Trim();
         _draft.Runtime.Mode = ModeBox.SelectedItem?.ToString() ?? "venv"; _draft.Runtime.Shell = ShellBox.SelectedItem?.ToString() ?? "auto";
         _draft.Runtime.ProjectDir = ProjectDirBox.Text.Trim(); _draft.Runtime.Venv = VenvBox.Text.Trim();
         _draft.Runtime.Python = PythonBox.Text.Trim(); _draft.Runtime.Requirements = RequirementsBox.Text.Trim(); _draft.Runtime.Env = env;
         try { _workspace?.Commit(); }
-        catch (ConfigException ex) { _shell.Notify(ex.Message, "action-editor"); throw; }
+        catch (ConfigException ex) { _shell.NotifyLocalized(() => ex.Message, "action-editor"); throw; }
     }
     private void GenerateYaml_Click(object sender, RoutedEventArgs e) => TryEdit(() => { CommitEditors(); YamlBox.Text = ConfigStore.Serialize(_draft); MarkDirty(); });
     private void ApplyYaml_Click(object sender, RoutedEventArgs e) => TryEdit(() =>
     {
         var parsed = ConfigStore.Parse(YamlBox.Text);
-        if (!Dialogs.Confirm(Window.GetWindow(this), "用 YAML 更新设置表单？", "覆盖表单草稿，但暂不写入磁盘。", "更新表单")) return;
+        if (!Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.187"), L.Text("Text.188"), L.Text("Text.189"))) return;
         LoadDraft(parsed); MarkDirty();
     });
     private void Save_Click(object sender, RoutedEventArgs e) => TryEdit(() =>
@@ -78,14 +78,14 @@ public partial class SettingsView : UserControl
     });
     private void Reload_Click(object sender, RoutedEventArgs e) => TryEdit(() =>
     {
-        if (HasUnsavedChanges && !Dialogs.Confirm(Window.GetWindow(this), "放弃未保存的修改？", "从磁盘重新读取 launcher.yaml。", "放弃并重新加载", true)) return;
+        if (HasUnsavedChanges && !Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.190"), L.Text("Text.191"), L.Text("Ui.095"), true)) return;
         _shell.ReloadConfiguration();
     });
     private void BrowseProject_Click(object sender, RoutedEventArgs e)
-    { var d = new OpenFolderDialog { Title = "选择业务项目目录" }; if (d.ShowDialog(Window.GetWindow(this)) == true) ProjectDirBox.Text = d.FolderName; }
+    { var d = new OpenFolderDialog { Title = L.Text("Text.193") }; if (d.ShowDialog(Window.GetWindow(this)) == true) ProjectDirBox.Text = d.FolderName; }
     private void BrowseVenv_Click(object sender, RoutedEventArgs e)
-    { var d = new OpenFolderDialog { Title = "选择项目虚拟环境" }; if (d.ShowDialog(Window.GetWindow(this)) == true) VenvBox.Text = d.FolderName; }
-    private void TryEdit(Action action) { try { action(); } catch (Exception e) { DirtyLabel.Text = "● 未保存 · 请修正错误后重试"; if (_shell.NotificationDetail != e.Message || !_shell.HasNotification) _shell.Notify(e.Message, "settings"); } }
+    { var d = new OpenFolderDialog { Title = L.Text("Text.194") }; if (d.ShowDialog(Window.GetWindow(this)) == true) VenvBox.Text = d.FolderName; }
+    private void TryEdit(Action action) { try { action(); } catch (Exception e) { DirtyLabel.Localize(TextBlock.TextProperty, "Text.195"); if (_shell.NotificationDetail != e.Message || !_shell.HasNotification) _shell.NotifyLocalized(() => e.Message, "settings"); } }
     public void DiscardDirtyMarker() => HasUnsavedChanges = false;
     public void SelectDesigner() => SettingTabs.SelectedIndex = 1;
     public void SelectAction(string id) { SettingTabs.SelectedIndex = 1; if (!HasUnsavedChanges) _workspace?.SelectAction(id); }

@@ -24,8 +24,8 @@ public sealed class LauncherConfig
 
 public sealed class AppDefinition
 {
-    public string Name { get; set; } = "我的 Python 项目";
-    public string Description { get; set; } = "配置参数，在项目环境中运行。";
+    public string Name { get; set; } = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.6");
+    public string Description { get; set; } = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.7");
     public string Version { get; set; } = "1.0.0";
     public string OutputDir { get; set; } = "output";
 }
@@ -44,7 +44,7 @@ public sealed class RuntimeDefinition
 public sealed class ActionDefinition
 {
     public string Id { get; set; } = "run";
-    public string Label { get; set; } = "运行项目";
+    public string Label { get; set; } = ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.8");
     public List<string> Argv { get; set; } = ["python", "main.py"];
     // null = all parameters; [] = no parameters. Do not collapse these states.
     public List<string>? Parameters { get; set; }

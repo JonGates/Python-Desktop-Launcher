@@ -22,7 +22,7 @@ public sealed class ProcessRunner : IDisposable
         CancellationTokenSource stop;
         lock (_gate)
         {
-            if (_running) throw new InvalidOperationException("该运行器已经有任务在执行。");
+            if (_running) throw new InvalidOperationException(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.0"));
             _running = true; _stop = stop = new CancellationTokenSource();
         }
         using var timeout = new CancellationTokenSource();
@@ -53,7 +53,7 @@ public sealed class ProcessRunner : IDisposable
             {
                 lifetime = _lifetimeFactory();
                 try { lifetime.Attach(process); }
-                catch (Exception e) { Output?.Invoke("[启动器] Job Object 绑定失败，将使用进程树终止兜底：" + e.Message + "\n"); lifetime.Dispose(); lifetime = null; }
+                catch (Exception e) { Output?.Invoke(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.1") + e.Message + "\n"); lifetime.Dispose(); lifetime = null; }
             }
             var outputTask = PumpAsync(process.StandardOutput, new StreamingRedactor(command.Secrets));
             var errorTask = PumpAsync(process.StandardError, new StreamingRedactor(command.Secrets));
@@ -67,7 +67,7 @@ public sealed class ProcessRunner : IDisposable
             // Close job-owned descendants even if the parent exits first; inherited output pipes must not hang forever.
             lifetime?.Dispose(); lifetime = null;
             try { await Task.WhenAll(outputTask, errorTask).WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false); }
-            catch (TimeoutException) { Output?.Invoke("\n[启动器] 输出管道未及时关闭，已停止等待。\n"); }
+            catch (TimeoutException) { Output?.Invoke(ProjectLauncher.Core.Localization.TextCatalog.Format(ProjectLauncher.Core.Localization.TextCatalog.Language, "Runtime.2")); }
             return new(process.ExitCode, cancelled || cancellation.IsCancellationRequested || stop.IsCancellationRequested,
                 timeout.IsCancellationRequested, clock.Elapsed);
         }
