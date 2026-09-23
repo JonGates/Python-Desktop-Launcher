@@ -5,6 +5,10 @@ namespace ProjectLauncher.Core;
 
 public sealed class ConfigException : Exception
 {
+    public Localization.LocalizedDiagnostic? Diagnostic { get; }
+    public override string Message => Diagnostic?.Render(Localization.TextCatalog.Language) ?? base.Message;
+    public ConfigException(Localization.LocalizedDiagnostic diagnostic, Exception? inner = null)
+        : base(diagnostic.Render("zh-CN"), inner) { Diagnostic = diagnostic; }
     public ConfigException(string message) : base(message) { }
     public ConfigException(string message, Exception inner) : base(message, inner) { }
 }
@@ -105,7 +109,7 @@ public static class ValueCodec
         var s = Text(value).Trim();
         if (s.Length == 0) return false;
         if (bool.TryParse(s, out b)) return b;
-        throw new ConfigException($"布尔值必须为 true 或 false，当前值为：{s}");
+        throw new ConfigException(new Localization.LocalizedDiagnostic("Error.Models.1", [s]));
     }
 
     public static bool Equivalent(object? left, object? right) =>

@@ -46,7 +46,7 @@ public sealed class ProcessRunner : IDisposable
             start.Environment.Clear();
             foreach (var (key, value) in executionEnvironment) start.Environment[key] = value;
             process = new Process { StartInfo = start };
-            if (!process.Start()) throw new ConfigException("无法启动进程：" + command.Argv[0]);
+            if (!process.Start()) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProcessRunner.1", [command.Argv[0]]));
             lock (_gate) _process = process;
             process.StandardInput.Close(); // GUI actions are noninteractive. Use a project terminal for prompts.
             if (_lifetimeFactory is not null)
@@ -72,7 +72,7 @@ public sealed class ProcessRunner : IDisposable
                 timeout.IsCancellationRequested, clock.Elapsed);
         }
         catch (OperationCanceledException) { return new(-1, true, timeout.IsCancellationRequested, clock.Elapsed); }
-        catch (System.ComponentModel.Win32Exception e) { throw new ConfigException("程序启动失败。请检查入口和环境：" + e.Message, e); }
+        catch (System.ComponentModel.Win32Exception e) { throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProcessRunner.2", [e.Message]), e); }
         finally
         {
             if (process is not null) Kill(process);

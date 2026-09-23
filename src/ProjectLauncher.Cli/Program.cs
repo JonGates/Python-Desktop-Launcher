@@ -30,6 +30,7 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
 
     public static async Task<int> MainAsync(string[] args)
     {
+        ProjectLauncher.Core.Localization.TextCatalog.Language = ProjectLauncher.Core.Localization.TextCatalog.Normalize(null, System.Globalization.CultureInfo.CurrentUICulture.Name);
         Console.OutputEncoding = new UTF8Encoding(false);
         if (args.Length == 0 || args.Contains("--help") || args.Contains("-h")) { Console.WriteLine(Help); return 0; }
         bool interactive = false; using var cancellation = new CancellationTokenSource();
@@ -43,7 +44,7 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
             var values = new Dictionary<string, object?>();
             for (int i = 1; i < args.Length; i++)
             {
-                string Next() => ++i < args.Length ? args[i] : throw new ConfigException("缺少选项值：" + args[i - 1]);
+                string Next() => ++i < args.Length ? args[i] : throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.0", [args[i - 1]]));
                 switch (args[i])
                 {
                     case "--project": case "--config": location = Next(); break;
@@ -52,18 +53,18 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
                     case "--shell": shellChoice = Next(); break;
                     case "--set":
                         var pair = Next(); int equals = pair.IndexOf('=');
-                        if (equals < 1) throw new ConfigException("--set 格式需要 name=value。"); values[pair[..equals]] = pair[(equals + 1)..]; break;
+                        if (equals < 1) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.1", [])); values[pair[..equals]] = pair[(equals + 1)..]; break;
                     default:
                         if (verb == "run" && actionId is null && !args[i].StartsWith('-')) actionId = args[i];
-                        else throw new ConfigException("未知参数：" + args[i]); break;
+                        else throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.2", [args[i]])); break;
                 }
             }
             var path = Path.GetFullPath(Directory.Exists(location) ? Path.Combine(location, "launcher.yaml") : location);
             var snapshot = ConfigStore.Load(path); var runtime = new ProjectEnvironment(snapshot.Config, path);
-            foreach (var key in values.Keys) if (!snapshot.Config.Parameters.Any(p => p.Name == key)) throw new ConfigException("不存在参数：" + key);
+            foreach (var key in values.Keys) if (!snapshot.Config.Parameters.Any(p => p.Name == key)) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.3", [key]));
             if (verb is "run" or "init" or "shell" || verb == "env" && trust)
             {
-                if (!trust) throw new ConfigException("执行代码前必须显式传入 --trust。请先检查 launcher.yaml。启动器不是沙箱。");
+                if (!trust) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.4", []));
                 lease = ProjectLease.Acquire(path);
             }
             switch (verb)
@@ -77,7 +78,7 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
                     else Console.WriteLine($"项目：{runtime.Root}\n虚拟环境：{runtime.EnvironmentDirectory}\n解释器：{runtime.PythonPath}\n结构存在：{runtime.Exists}\nuv：{runtime.UvPath ?? "未找到"}\n加 --trust 才会实际执行解释器检查。");
                     return 0;
                 case "init":
-                    if (!yes) throw new ConfigException("初始化可能安装 Python / 依赖。检查配置后使用 --trust --yes 明确确认。");
+                    if (!yes) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.5", []));
                     foreach (var command in runtime.InitializationPlan())
                     {
                         var code = await RunAsync(command, runtime.Root, runtime.InitializationEnvironment(), cancellation.Token);
@@ -85,21 +86,21 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
                     }
                     Console.WriteLine("初始化计划执行结束；可用 env --trust 检查实际解释器。"); return 0;
                 case "run":
-                    actionId ??= snapshot.Config.Actions.FirstOrDefault()?.Id ?? throw new ConfigException("尚未添加启动动作，请先在项目设置中添加。");
+                    actionId ??= snapshot.Config.Actions.FirstOrDefault()?.Id ?? throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.6", []));
                     return await RunAsync(CommandBuilder.Build(snapshot.Config, actionId, values, runtime.Root, runtime.RequirePython()), runtime.Root, runtime.ExecutionEnvironment(), cancellation.Token);
                 case "shell":
-                    if (shellChoice is not ("auto" or "powershell" or "pwsh" or "cmd" or "python")) throw new ConfigException("不支持这个 Shell 选项。");
+                    if (shellChoice is not ("auto" or "powershell" or "pwsh" or "cmd" or "python")) throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.7", []));
                     interactive = true;
                     var commandLine = runtime.ShellCommand(shellChoice); var start = new ProcessStartInfo(commandLine[0]) { WorkingDirectory = runtime.Root, UseShellExecute = false };
                     foreach (var arg in commandLine.Skip(1)) start.ArgumentList.Add(arg);
                     start.Environment.Clear(); foreach (var (key, value) in runtime.ExecutionEnvironment()) start.Environment[key] = value;
-                    using (var process = Process.Start(start) ?? throw new ConfigException("无法启动项目 Shell。"))
+                    using (var process = Process.Start(start) ?? throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.8", [])))
                     using (var job = new JobObject())
                     {
                         try { job.Attach(process); } catch { try { process.Kill(true); } catch { } throw; }
                         await process.WaitForExitAsync(); return process.ExitCode;
                     }
-                default: throw new ConfigException("未知命令：" + verb + "\n\n" + Help);
+                default: throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Error.Cli.9", [verb, Help]));
             }
         }
         catch (OperationCanceledException) { return 130; }

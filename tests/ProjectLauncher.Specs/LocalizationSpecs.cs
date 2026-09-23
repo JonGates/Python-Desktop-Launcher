@@ -1,9 +1,22 @@
 using ProjectLauncher.Core.Localization;
+using ProjectLauncher.Core;
 
 sealed partial class SpecSuite
 {
     private void LocalizationSpecs()
     {
+        Test("structured diagnostic renders independently without translating arguments", () => {
+            var diagnostic = new LocalizedDiagnostic("Error.InvalidNumber", ["保存"]);
+            Eq("Invalid number: 保存", diagnostic.Render("en-US"));
+            Eq("无效数字：保存", diagnostic.Render("zh-CN"));
+            var config = Simple(); config.Parameters[0].Type = "invalid";
+            try { ConfigValidator.Validate(config); throw new Exception("Accepted invalid type"); }
+            catch (ConfigException ex) {
+                True(ex.Diagnostic is not null, "Validation lost diagnostic identity");
+                True(ex.Diagnostic!.Render("en-US").Contains("workers"));
+                True(ex.Diagnostic.Render("en-US").Contains("invalid"));
+            }
+        });
         Test("language prefers saved selection and maps system culture", () => {
             Eq("zh-CN", TextCatalog.Normalize(null, "zh-TW"));
             Eq("en-US", TextCatalog.Normalize(null, "fr-FR"));

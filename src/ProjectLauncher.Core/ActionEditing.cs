@@ -27,7 +27,7 @@ public static class ActionEditing
         }
         else
         {
-            if (!target.Parameters!.Contains(originalName)) throw new ConfigException("当前动作不包含此参数。");
+            if (!target.Parameters!.Contains(originalName)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ActionEditing.1", []));
             var remap = new Dictionary<string, string>();
             var affected = new HashSet<string> { originalName };
             // Localize downstream conditions as well, so they keep following the edited field.
@@ -71,7 +71,7 @@ public static class ActionEditing
     public static void ExplicitMembership(LauncherConfig config, bool confirmed)
     {
         if (!config.Actions.Any(a => a.Parameters is null)) return;
-        if (!confirmed) throw new ConfigException("存在使用全部参数的动作；请确认将其转换为当前参数的显式列表，再修改参数成员。");
+        if (!confirmed) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ActionEditing.2", []));
         foreach (var a in config.Actions.Where(a => a.Parameters is null)) a.Parameters = config.Parameters.Select(p => p.Name).ToList();
     }
     public static ParameterDefinition AddParameter(LauncherConfig config, ActionDefinition action, bool confirmed = false)

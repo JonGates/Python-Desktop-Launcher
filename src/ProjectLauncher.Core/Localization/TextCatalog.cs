@@ -6,6 +6,8 @@ namespace ProjectLauncher.Core.Localization;
 
 public static class TextCatalog
 {
+    // Presentation language only. Never changes numeric parsing or child process culture.
+    public static string Language { get; set; } = "zh-CN";
     private static readonly IReadOnlyDictionary<string, string> English = Load("EnUs");
     private static readonly IReadOnlyDictionary<string, string> Chinese = Load("ZhCn");
     public static string Normalize(string? saved, string systemLanguage) => saved is "zh-CN" or "en-US"

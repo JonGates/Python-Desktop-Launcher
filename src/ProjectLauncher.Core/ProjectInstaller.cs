@@ -5,7 +5,7 @@ public static class ProjectInstaller
     public static LauncherConfig Discover(string directory, string? entry = null)
     {
         directory = Path.GetFullPath(directory);
-        if (!Directory.Exists(directory)) throw new ConfigException("目标项目目录不存在。");
+        if (!Directory.Exists(directory)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectInstaller.1", []));
         entry ??= new[] { "main.py", "app.py", "run.py", "server.py" }.FirstOrDefault(f => File.Exists(Path.Combine(directory, f))) ?? "main.py";
         var environment = ProjectSetup.FindEnvironments(directory).FirstOrDefault();
         var mode = environment is not null ? "existing" :
@@ -22,11 +22,11 @@ public static class ProjectInstaller
     public static List<string> Install(string launcherExecutable, string directory, string entry)
     {
         directory = Path.GetFullPath(directory);
-        if (!Directory.Exists(directory)) throw new ConfigException("请选择已经存在的项目目录。");
-        if (!File.Exists(launcherExecutable)) throw new ConfigException("找不到可复制的启动器文件。");
+        if (!Directory.Exists(directory)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectInstaller.2", []));
+        if (!File.Exists(launcherExecutable)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectInstaller.3", []));
         var target = Path.Combine(directory, "Launcher.exe");
         var config = Path.Combine(directory, "launcher.yaml");
-        if (File.Exists(target) || Directory.Exists(target)) throw new ConfigException("目标目录已有 Launcher.exe。为避免覆盖，接入已取消。升级时请先备份并重命名旧 EXE。");
+        if (File.Exists(target) || Directory.Exists(target)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectInstaller.4", []));
         if (File.Exists(config)) ConfigStore.Load(config); // Validate before any copy; existing configuration is kept verbatim.
         var created = new List<string>();
         var temporary = Path.Combine(directory, ".launcher-copy-" + Guid.NewGuid().ToString("N") + ".tmp");

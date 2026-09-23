@@ -29,13 +29,13 @@ public sealed class ProjectEnvironment
         var shellInternal = Path.Combine(Path.GetDirectoryName(ConfigPath)!, ".launcher");
         if (SamePath(EnvironmentDirectory, Root) || SamePath(EnvironmentDirectory, Path.GetPathRoot(EnvironmentDirectory)!) ||
             SamePath(EnvironmentDirectory, legacy) || SamePath(EnvironmentDirectory, shellInternal) || IsInside(EnvironmentDirectory, shellInternal))
-            throw new ConfigException("项目虚拟环境不能使用项目根目录、磁盘根目录或 .launcher 内部目录。");
+            throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.1", []));
     }
 
     public string RequirePython()
     {
-        if (!Directory.Exists(Root)) throw new ConfigException("项目目录不存在：" + Root);
-        if (!Exists) throw new ConfigException("项目 Python 环境未准备好。请到「环境管理」创建/同步，或在设置中指定现有环境。不会退回系统 Python。\n" + PythonPath);
+        if (!Directory.Exists(Root)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.2", [Root]));
+        if (!Exists) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.3", [PythonPath]));
         return PythonPath;
     }
 
@@ -64,16 +64,16 @@ public sealed class ProjectEnvironment
 
     public List<CommandPlan> InitializationPlan()
     {
-        if (!Directory.Exists(Root)) throw new ConfigException("项目目录不存在：" + Root);
+        if (!Directory.Exists(Root)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.4", [Root]));
         if (Config.Runtime.Mode == "existing") { RequirePython(); return []; }
         if (Directory.Exists(EnvironmentDirectory) && !Exists && Directory.EnumerateFileSystemEntries(EnvironmentDirectory).Any())
-            throw new ConfigException("环境目录已存在但不完整。为避免删除你的文件，本程序不会覆盖。请先手动备份并重命名该目录，或选用新的环境目录。\n" + EnvironmentDirectory);
+            throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.5", [EnvironmentDirectory]));
         var plans = new List<CommandPlan>();
         var uv = UvPath;
         if (Config.Runtime.Mode == "uv")
         {
-            if (uv is null) throw new ConfigException("未找到 uv。请安装 uv 并重新打开启动器，或改用 venv / existing 模式。");
-            if (!File.Exists(Path.Combine(Root, "pyproject.toml"))) throw new ConfigException("uv 模式需要项目中的 pyproject.toml。");
+            if (uv is null) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.6", []));
+            if (!File.Exists(Path.Combine(Root, "pyproject.toml"))) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.7", []));
             var args = new List<string> { uv, "sync", "--project", Root };
             if (File.Exists(Path.Combine(Root, "uv.lock"))) args.Add("--locked");
             if (!string.IsNullOrWhiteSpace(Config.Runtime.Python)) { args.Add("--python"); args.Add(Config.Runtime.Python); }
@@ -96,7 +96,7 @@ public sealed class ProjectEnvironment
         if (!string.IsNullOrWhiteSpace(Config.Runtime.Requirements))
         {
             var requirements = Path.GetFullPath(Config.Runtime.Requirements, Root);
-            if (!File.Exists(requirements)) throw new ConfigException("requirements 文件不存在：" + requirements);
+            if (!File.Exists(requirements)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.8", [requirements]));
             plans.Add(uv is not null ? Plan([uv, "pip", "install", "--python", PythonPath, "-r", requirements])
                 : Plan([PythonPath, "-m", "pip", "install", "-r", requirements]));
         }
@@ -112,15 +112,15 @@ public sealed class ProjectEnvironment
             {
                 var py = OperatingSystem.IsWindows() ? FindExecutable("py", env) : null;
                 if (py is not null) return [py, "-" + requested];
-                throw new ConfigException("没有 uv / Python Launcher 时，python 字段需要指定可执行文件路径，不是版本号。");
+                throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.9", []));
             }
             var path = CommandBuilder.IsExplicitPath(requested) ? Path.GetFullPath(requested, Root) : FindExecutable(requested, env);
-            if (path is null || !File.Exists(path)) throw new ConfigException("指定的初始化解释器不存在：" + requested);
+            if (path is null || !File.Exists(path)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.10", [requested]));
             return [path];
         }
         if (OperatingSystem.IsWindows() && FindExecutable("py", env) is { } launcher) return [launcher, "-3"];
         var python = FindExecutable(OperatingSystem.IsWindows() ? "python" : "python3", env);
-        if (python is null) throw new ConfigException("未找到可用的 Python 或 uv。请先安装，或在设置中填写初始化解释器的完整路径。");
+        if (python is null) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.11", []));
         return [python];
     }
 
@@ -132,7 +132,7 @@ public sealed class ProjectEnvironment
         if (shell is "auto" or "pwsh")
         {
             if (FindExecutable("pwsh", env) is { } pwsh) return [pwsh, "-NoLogo", "-NoProfile"];
-            if (shell == "pwsh") throw new ConfigException("未找到 PowerShell 7 的 pwsh.exe。");
+            if (shell == "pwsh") throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.12", []));
         }
         if (shell is "auto" or "powershell")
         {
@@ -150,15 +150,15 @@ public sealed class ProjectEnvironment
         var output = new System.Text.StringBuilder(); var gate = new object();
         runner.Output += text => { lock (gate) output.Append(text); };
         var result = await runner.RunAsync(new([python, "-I", "-c", script], new(), "检查项目解释器", [], 20), Root, ExecutionEnvironment(), cancellation);
-        if (result.ExitCode != 0 || result.Cancelled || result.TimedOut) throw new ConfigException("解释器检查失败：\n" + output);
+        if (result.ExitCode != 0 || result.Cancelled || result.TimedOut) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.13", [output]));
         var json = output.ToString().Split('\n').LastOrDefault(line => line.TrimStart().StartsWith('{'));
-        if (json is null) throw new ConfigException("解释器没有返回预期 JSON，环境可能已损坏。");
+        if (json is null) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.14", []));
         using var doc = JsonDocument.Parse(json);
         var d = doc.RootElement;
         var probe = new EnvironmentProbe(d.GetProperty("executable").GetString()!, d.GetProperty("prefix").GetString()!,
             d.GetProperty("base_prefix").GetString()!, d.GetProperty("version").GetString()!, d.GetProperty("has_pip").GetBoolean());
         if (!SamePath(probe.Prefix, EnvironmentDirectory) || SamePath(probe.Prefix, probe.BasePrefix))
-            throw new ConfigException("解释器报告的 sys.prefix 不属于所选虚拟环境。请重新创建环境，不要直接复制别的项目的 .venv。\n" + probe.Prefix);
+            throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.15", [probe.Prefix]));
         return probe;
     }
 
@@ -180,9 +180,9 @@ public sealed class ProjectEnvironment
     public static string ResolveExecutable(string command, string cwd, IReadOnlyDictionary<string, string> environment)
     {
         var path = CommandBuilder.IsExplicitPath(command) ? Path.GetFullPath(command, cwd) : FindExecutable(command, environment);
-        if (path is null || !File.Exists(path)) throw new ConfigException("未在指定路径或项目 PATH 中找到可执行文件：" + command);
+        if (path is null || !File.Exists(path)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.16", [command]));
         if (OperatingSystem.IsWindows() && Path.GetExtension(path).ToLowerInvariant() is ".bat" or ".cmd")
-            throw new ConfigException("批处理文件需要显式使用 cmd.exe /d /c 执行；不要向 Shell 字符串拼接未经校验的表单参数。");
+            throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectEnvironment.17", []));
         return path;
     }
 

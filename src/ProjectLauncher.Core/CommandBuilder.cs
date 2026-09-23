@@ -25,7 +25,7 @@ public static class CommandBuilder
         string projectRoot, string projectPython)
     {
         ConfigValidator.Validate(config);
-        var action = config.Actions.FirstOrDefault(a => a.Id == actionId) ?? throw new ConfigException("找不到动作：" + actionId);
+        var action = config.Actions.FirstOrDefault(a => a.Id == actionId) ?? throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.1", [actionId]));
         var effective = EffectiveValues(config, values);
         var argv = action.Argv.ToList();
         var first = Path.GetFileName(argv[0]).ToLowerInvariant();
@@ -61,39 +61,39 @@ public static class CommandBuilder
     private static string? Normalize(ParameterDefinition p, object? value, string root)
     {
         var text = ValueCodec.Text(value);
-        if (text.Contains('\0')) throw new ConfigException(p.DisplayName + "不能含有 NUL 字符。");
-        if (text.Length > 65536 || p.IsSecret && text.Length > 8192) throw new ConfigException(p.DisplayName + " 的值过长。");
+        if (text.Contains('\0')) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.2", [p.DisplayName]));
+        if (text.Length > 65536 || p.IsSecret && text.Length > 8192) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.3", [p.DisplayName]));
         if (p.Type == "boolean")
         {
             try { return ValueCodec.Boolean(value) ? "true" : "false"; }
-            catch (ConfigException) { throw new ConfigException(p.DisplayName + " 需要 true 或 false。"); }
+            catch (ConfigException) { throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.4", [p.DisplayName])); }
         }
         if (string.IsNullOrWhiteSpace(text))
         {
-            if (p.Required) throw new ConfigException("请填写：" + p.DisplayName);
+            if (p.Required) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.5", [p.DisplayName]));
             return null;
         }
         if (p.Type == "integer")
         {
-            if (!long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var integer)) throw new ConfigException(p.DisplayName + " 必须是整数。");
+            if (!long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var integer)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.6", [p.DisplayName]));
             CheckRange(p, integer); return integer.ToString(CultureInfo.InvariantCulture);
         }
         if (p.Type == "number")
         {
-            if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) || !double.IsFinite(number)) throw new ConfigException(p.DisplayName + " 必须是有限数值（小数点使用 .）。");
+            if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) || !double.IsFinite(number)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.7", [p.DisplayName]));
             CheckRange(p, number); return number.ToString("G17", CultureInfo.InvariantCulture);
         }
-        if (p.Type == "select" && !p.Options.Contains(text, StringComparer.Ordinal)) throw new ConfigException(p.DisplayName + " 不是允许的选项。");
+        if (p.Type == "select" && !p.Options.Contains(text, StringComparer.Ordinal)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.8", [p.DisplayName]));
         if (p.Type is "file" or "directory")
         {
             text = Path.GetFullPath(text, root);
-            if (p.MustExist && !(p.Type == "file" ? File.Exists(text) : Directory.Exists(text))) throw new ConfigException(p.DisplayName + " 不存在或类型不匹配：" + text);
+            if (p.MustExist && !(p.Type == "file" ? File.Exists(text) : Directory.Exists(text))) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.9", [p.DisplayName, text]));
         }
         return text;
     }
     private static void CheckRange(ParameterDefinition p, double value)
     {
-        if (p.Min is not null && value < p.Min || p.Max is not null && value > p.Max) throw new ConfigException($"{p.DisplayName} 超出允许范围（{p.Min?.ToString(CultureInfo.InvariantCulture) ?? "不限"} – {p.Max?.ToString(CultureInfo.InvariantCulture) ?? "不限"}）。");
+        if (p.Min is not null && value < p.Min || p.Max is not null && value > p.Max) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.CommandBuilder.10", [p.DisplayName, p.Min?.ToString(CultureInfo.InvariantCulture) ?? "unlimited", p.Max?.ToString(CultureInfo.InvariantCulture) ?? "unlimited"]));
     }
 }
 

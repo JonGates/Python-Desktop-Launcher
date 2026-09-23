@@ -11,7 +11,7 @@ public static class ProjectSetup
     public static IReadOnlyList<string> FindEnvironments(string directory)
     {
         directory = Path.GetFullPath(directory);
-        if (!Directory.Exists(directory)) throw new ConfigException("项目目录不存在：" + directory);
+        if (!Directory.Exists(directory)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectSetup.1", [directory]));
         var result = new List<string>();
         // One level only: never scan dependencies, recurse into repositories, or follow junctions.
         foreach (var child in new DirectoryInfo(directory).EnumerateDirectories("*", new EnumerationOptions
@@ -38,7 +38,7 @@ public static class ProjectSetup
         if (!string.IsNullOrWhiteSpace(environmentDirectory))
         {
             var environment = Path.GetFullPath(environmentDirectory, project);
-            if (!IsEnvironment(environment)) throw new ConfigException("所选目录不是完整的 Python 虚拟环境，需要 pyvenv.cfg 和环境内的 Python 解释器。\n" + environment);
+            if (!IsEnvironment(environment)) throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectSetup.2", [environment]));
             config.Runtime.Mode = "existing";
             config.Runtime.Venv = ProjectEnvironment.IsInside(environment, project) ? Path.GetRelativePath(project, environment) : environment;
             config.Runtime.Requirements = "";
@@ -57,7 +57,7 @@ public static class ProjectSetup
         {
             var script = Path.GetFullPath(entry, project);
             if (!File.Exists(script) || !ProjectEnvironment.IsInside(script, project) || !script.EndsWith(".py", StringComparison.OrdinalIgnoreCase))
-                throw new ConfigException("请选择项目目录内已有的 .py 入口文件；也可以留空，稍后在项目设置中配置模块或自定义命令。");
+                throw new ConfigException(new Localization.LocalizedDiagnostic("Error.ProjectSetup.3", []));
             config.Actions[0].Argv = ["python", Path.GetRelativePath(project, script)];
         }
         return ConfigStore.Save(configPath, config, null);
