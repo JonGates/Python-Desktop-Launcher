@@ -13,9 +13,9 @@
 | Windows ConPTY / Job / 项目锁测试 | 已执行，通过 | 4 项通过；包含父进程标准流重定向时的 ConPTY 输入回归 |
 | WPF 深浅色截图与绑定错误检查 | 已执行，通过 | 58 张原生 WPF 图片：原有 24 张，Toast 深浅主题 2 张，中英 × 深浅主题 × 两种尺寸 × 四页面 32 张；共 37 项 PASS，包含未保存非法输入、实时语言切换、实际任务与 CMD 变量保持，以及错误详情弹窗 |
 | Python Demo 自动化测试 | 已执行，通过 | 13 tests，OK；只验证示例业务脚本 |
-| 静态源码检查 | 已执行，通过 | 622 passed，0 failed；不是 C# 编译器或 WPF 运行时；计数含本地生成的项目文件 |
+| 静态源码检查 | 已执行，通过 | 0 failed；准确计数见 [静态报告](reports/static-checks.txt)，计数含本地生成的项目文件；不是 C# 编译器或 WPF 运行时 |
 | 源码文件 SHA-256 | 已更新 | 根目录 `MANIFEST.sha256`；仅代表所列源码文件完整性 |
-| 单文件自包含 Windows EXE | 已执行，通过 | `Test-Windows.ps1` 与 `Build.ps1` 成功生成 GUI / CLI EXE，以及 portable / demo ZIP；x64 GUI EXE 65,137,270 字节 |
+| 单文件自包含 Windows EXE | 已执行，通过 | `Test-Windows.ps1` 与 `Build.ps1` 成功生成 GUI / CLI EXE，以及 portable / demo ZIP；x64 GUI EXE 65,137,336 字节 |
 | 复制单个 EXE 到项目 | 已执行，通过 | `tools/Test-Portable.ps1`：6 项 PASS；真实 UI Automation 操作已有环境、无环境、取消、已有配置重开，并实际探测绑定的 Python 3.12.10 环境；正常关闭通过 |
 | 人工 DPI / IME / 完整工作流 | **未执行** | 仍须按下方清单在交互式桌面逐项验收 |
 
@@ -32,7 +32,7 @@
 `artifacts/portable/Launcher.exe` 的 SHA-256：
 
 ```text
-1E8DCF00AA88E2A43C94F24303ECA3CF17617D8126DB80F201A71A42DED597C0
+050347D97C68B43477C0343ADAD0BE7843BC9FABF5C45C2FACB4C3B2AB7B0D3B
 ```
 
 单文件测试目录只有复制的 EXE 和项目自身文件，运行时确认 WPF 原生组件来自 EXE 的临时解包目录。尚未在未安装 .NET 的独立测试机上验收。下载过慢的两个运行时包通过镜像获取后，逐个比对 NuGet 官方响应中的 SHA-512，均一致；仓库 NuGet 源配置未改动。
@@ -44,7 +44,7 @@
 - x64：84 项 Core、4 项 Windows 原生测试、37 项 WPF PASS / 58 张图片、6 项便携测试通过。
 - x86：自包含 EXE 在当前 x64 Windows 的 WOW64 下运行；4 项原生测试、37 项 WPF PASS / 58 张图片、6 项便携测试通过。包括实际 CMD 状态保留和 Job Object 清理。未在独立 32 位 Windows 上验收。
 - x86 测试使用 32 位 PowerShell 枚举模块，避免 .NET Framework 的跨架构模块枚举限制；窗口按 AutomationId 定位，不依赖中文标题。
-- x86 GUI：60,751,844 字节，SHA-256 `B9421A6B56B4025C481BBABE3DE10D8C5A680C92F8AB0B06EB33F4E9A4B691A9`。
+- x86 GUI：60,751,904 字节，SHA-256 `05A1FDFA85A8E9E6CB971BAE713B747BF750154C49BB20AFF3B78FDC13B525A6`。
 - x86 运行时下载缓慢时使用镜像取得 .NET 10.0.8 包，并逐个匹配 NuGet 官方响应的 SHA-512 后才还原；仓库 NuGet 源没有变更。
 - 双架构 EXE 的 PE Machine 分别为 8664 / 014C，文件版本均为 1.0.0.0；无代码签名。
 
@@ -88,7 +88,7 @@ WPF 检查遍历四个页面与深/浅主题，使用 `RenderTargetBitmap` 导�
 
 此外，首次接入窗口在深/浅主题下分别测试 0 / 1 / 2 个环境，生成另 6 张图片；操作真实 WPF 按钮验证不要求入口、多个环境必须选择、生成配置、取消以及配置文件中途出现时保持原文。环境文件是结构测试 fixture，不执行其中的解释器。
 
-发布后运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1`，可复核只复制一个 EXE 的接入流程。脚本会在 `artifacts/portable-test-*` 中创建隔离的真实虚拟环境，并使用 Windows UI Automation 操作测试窗口。本轮报告位于 `artifacts/portable-test-efedea04a2524fd68000ec81c215c86b/report.txt`。
+发布后运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1`，可复核只复制一个 EXE 的接入流程。脚本会在 `artifacts/portable-test-*` 中创建隔离的真实虚拟环境，并使用 Windows UI Automation 操作测试窗口。本轮报告位于 `artifacts/portable-test-ef3129d972e6439d86c5cc1dfb0d9967/report.txt`。
 
 自动截图检查也有边界：它不覆盖所有鼠标/键盘交互、所有启动阶段绑定错误、IME、不同缩放和全部 TUI 兼容。不能仅凭自动截图宣告产品已经验收。
 

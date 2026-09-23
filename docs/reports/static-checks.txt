@@ -1,4 +1,4 @@
 Project Launcher static source checks — NOT a C# compilation or Windows test
 NOTE: YAML fixture checks used PyYAML; they do not verify YamlDotNet behavior or C# validation.
-CHECKS: 622 | PASSED: 622 | FAILED: 0
+CHECKS: 701 | PASSED: 701 | FAILED: 0
 NOT RUN HERE: dotnet build, C# specs, WPF rendering, Windows ConPTY / Job / lease integration.
