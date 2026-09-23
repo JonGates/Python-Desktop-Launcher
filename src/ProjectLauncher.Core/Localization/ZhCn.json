@@ -1,0 +1,9 @@
+{
+  "Common.Save": "保存",
+  "Common.Details": "详情",
+  "Common.CloseNotice": "关闭提示",
+  "Settings.Title": "项目设置",
+  "Error.InvalidNumber": "无效数字：{0}",
+  "Error.PreferenceRead": "无法读取语言偏好，已使用系统语言。{0}",
+  "Error.PreferenceSave": "本次语言已切换，但无法保存偏好。{0}"
+}

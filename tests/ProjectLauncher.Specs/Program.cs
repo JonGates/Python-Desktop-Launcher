@@ -32,6 +32,7 @@ sealed partial class SpecSuite
     public async Task RunAsync()
     {
         Directory.CreateDirectory(_root);
+        LocalizationSpecs();
         try
         {
             Test("legacy v1 configuration is readable", () => {

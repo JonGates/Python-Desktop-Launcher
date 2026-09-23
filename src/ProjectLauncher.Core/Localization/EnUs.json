@@ -1,0 +1,9 @@
+{
+  "Common.Save": "Save",
+  "Common.Details": "Details",
+  "Common.CloseNotice": "Dismiss notification",
+  "Settings.Title": "Project settings",
+  "Error.InvalidNumber": "Invalid number: {0}",
+  "Error.PreferenceRead": "Could not read language preferences. Using the system language. {0}",
+  "Error.PreferenceSave": "The language changed for this session, but could not be saved. {0}"
+}
