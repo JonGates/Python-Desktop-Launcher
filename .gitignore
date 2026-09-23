@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.vs/
+.vscode/
+artifacts/
+.venv/
+.launcher/
+*.user
+*.bak
+*.tmp
+*.log
+demo/output/
+__pycache__/

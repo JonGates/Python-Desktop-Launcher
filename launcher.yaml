@@ -1,0 +1,100 @@
+schema_version: 1
+app:
+  name: 文本工坊
+  description: 一份配置，把 Python 脚本变成顺手的桌面工具。
+  version: 1.0.0
+  output_dir: demo/output
+runtime:
+  mode: venv
+  project_dir: .
+  venv: .venv
+  python: ''
+  requirements: ''
+  shell: auto
+  env: {}
+actions:
+  - id: process
+    label: 处理文本
+    argv: [python, demo/process_text.py]
+    parameters: [input, output, mode, prefix, repeat, overwrite, delay, notes, fail, api_token]
+    timeout_seconds: 300
+  - id: diagnose
+    label: 检查业务环境
+    argv: [python, demo/environment_probe.py]
+    parameters: []
+    timeout_seconds: 20
+parameters:
+  - name: input
+    label: 输入文件
+    type: file
+    argument: --input
+    default: demo/sample.txt
+    required: true
+    must_exist: true
+    description: 选择 UTF-8 文本文件；也可以直接将文件拖入输入框。
+  - name: output
+    label: 输出目录
+    type: directory
+    argument: --output
+    default: demo/output
+    required: true
+    description: 生成 result.txt 和 summary.json。原始文件不会被修改。
+  - name: mode
+    label: 处理模式
+    type: select
+    argument: --mode
+    options: [uppercase, lowercase, prefix]
+    default: uppercase
+    description: uppercase 转大写 · lowercase 转小写 · prefix 逐行添加前缀。
+  - name: prefix
+    label: 行首前缀
+    type: text
+    argument: --prefix
+    default: '[Launcher] '
+    visible_when:
+      mode: prefix
+    description: 仅在 prefix 模式显示，并且只在该模式传给脚本。
+  - name: repeat
+    label: 重复次数
+    type: integer
+    argument: --repeat
+    default: 1
+    min: 1
+    max: 20
+    description: 将转换后的文本重复写入指定次数。
+  - name: overwrite
+    label: 覆盖已有结果
+    type: boolean
+    argument: --overwrite
+    default: false
+    description: 默认关闭；已有输出时会明确失败，不会静默覆盖。
+  - name: delay
+    label: 每行延迟（秒）
+    type: number
+    argument: --delay
+    default: 0.12
+    min: 0
+    max: 2
+    advanced: true
+    description: 用于观察真实进度与停止行为。实际业务可设为 0。
+  - name: notes
+    label: 运行备注
+    type: textarea
+    argument: --notes
+    default: ''
+    advanced: true
+    description: 原样保存到 summary.json；不要填写密钥或个人隐私。
+  - name: fail
+    label: 演示失败状态
+    type: boolean
+    argument: --fail
+    default: false
+    advanced: true
+    description: 打开后以退出码 7 结束，不创建输出。
+  - name: api_token
+    label: 演示密钥
+    type: password
+    binding: env
+    env_name: DEMO_API_TOKEN
+    advanced: true
+    description: 只通过本次进程环境传入。Demo 只显示是否提供，不输出密钥内容。

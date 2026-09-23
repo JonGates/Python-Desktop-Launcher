@@ -1,0 +1,8 @@
+Hello, Project Launcher!
+每个项目，都有自己的入口。
+Python 负责业务，C# 负责桌面体验。
+Configuration becomes a useful interface.
+支持中文、带空格的文件路径，以及明确的参数说明。
+GUI tasks and the project terminal share one environment.
+No web server. No browser window. Your project, locally.
+把重复操作留给工具，把注意力留给真正重要的事。

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
+    <AssemblyName>Launcher</AssemblyName><RootNamespace>ProjectLauncher.Desktop</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <PublishTrimmed>false</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../ProjectLauncher.Core/ProjectLauncher.Core.csproj" />
+    <ProjectReference Include="../ProjectLauncher.Windows/ProjectLauncher.Windows.csproj" />
+  </ItemGroup>
+</Project>

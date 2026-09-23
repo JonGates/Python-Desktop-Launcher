@@ -1,0 +1,80 @@
+<Window x:Class="ProjectLauncher.Desktop.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+ Title="Project Launcher" Width="1360" Height="900" MinWidth="1060" MinHeight="700"
+ WindowStyle="None" ResizeMode="CanResize" Background="{DynamicResource AppBackground}"
+ WindowStartupLocation="CenterScreen" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown">
+ <shell:WindowChrome.WindowChrome><shell:WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="12" UseAeroCaptionButtons="False"/></shell:WindowChrome.WindowChrome>
+ <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}">
+  <Grid>
+   <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/><RowDefinition Height="31"/></Grid.RowDefinitions>
+   <Grid Grid.Row="0" Background="{DynamicResource SidebarBackground}">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+     <Border Width="23" Height="23" CornerRadius="7" Background="{DynamicResource LogoGradient}" Margin="0,0,11,0"><Path Data="{StaticResource IconRun}" Fill="White" Width="10" Height="10" Stretch="Uniform"/></Border>
+     <TextBlock Text="PROJECT LAUNCHER" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryText}"/>
+     <TextBlock Text=" / " Margin="12,0" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"/>
+     <TextBlock Text="{Binding ProjectName}" FontSize="12" VerticalAlignment="Center"/>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+     <Button Content="—" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="最小化" Click="Minimize_Click"/>
+     <Button Content="□" Width="45" Height="34" Padding="0" Margin="0" Style="{StaticResource TextButton}" ToolTip="最大化 / 还原" Click="Maximize_Click"/>
+     <Button Content="✕" Width="45" Height="34" Padding="0" Margin="0,0,7,0" Style="{StaticResource TextButton}" ToolTip="关闭" Click="Close_Click"/>
+    </StackPanel>
+   </Grid>
+   <Grid Grid.Row="1">
+    <Grid.ColumnDefinitions><ColumnDefinition Width="204"/><ColumnDefinition/></Grid.ColumnDefinitions>
+    <Border Background="{DynamicResource SidebarBackground}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+     <Grid Margin="16,16,16,14">
+      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <StackPanel Margin="8,0,4,26">
+       <Border Width="43" Height="43" CornerRadius="13" Background="{DynamicResource LogoGradient}" HorizontalAlignment="Left" Margin="0,0,0,15"><Path Data="{StaticResource IconRun}" Fill="White" Width="17" Height="17" Stretch="Uniform" Margin="3,0,0,0"/></Border>
+       <TextBlock Text="Project Launcher" FontWeight="SemiBold" FontSize="17"/>
+       <TextBlock Text="每个项目，都有自己的入口。" FontSize="10.5" Margin="0,6,0,0" Foreground="{DynamicResource MutedTextBrush}"/>
+      </StackPanel>
+      <StackPanel Grid.Row="1" x:Name="Navigation">
+       <TextBlock Text="工作空间" Style="{StaticResource Micro}" Margin="13,0,0,10"/>
+       <RadioButton x:Name="RunNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="run" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconRun}" Fill="{DynamicResource SecondaryText}" Width="16" Height="16" Stretch="Uniform" Margin="0,0,13,0"/><TextBlock Text="运行项目" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="TerminalNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="terminal" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconTerminal}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="项目终端" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="EnvironmentNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="environment" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconEnvironment}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="环境管理" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+       <RadioButton x:Name="SettingsNav" Style="{StaticResource NavButton}" GroupName="Pages" Tag="settings" Checked="Nav_Checked"><StackPanel Orientation="Horizontal"><Path Data="{StaticResource IconSettings}" Stroke="{DynamicResource SecondaryText}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform" Margin="0,0,12,0"/><TextBlock Text="项目设置" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"/></StackPanel></RadioButton>
+      </StackPanel>
+      <StackPanel Grid.Row="3">
+       <Border Background="{DynamicResource PanelBackground}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="13" Margin="0,0,0,14">
+        <StackPanel>
+         <TextBlock Text="当前项目" Style="{StaticResource Micro}"/>
+         <TextBlock Text="{Binding ProjectName}" FontWeight="SemiBold" Margin="0,7,0,6" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectRoot}"/>
+         <TextBlock Text="{Binding RuntimeLabel}" Style="{StaticResource Micro}" TextTrimming="CharacterEllipsis"/>
+         <Button Content="打开项目目录  ↗" Style="{StaticResource TextButton}" FontSize="11" Padding="0,8,0,0" HorizontalAlignment="Left" Click="OpenFolder_Click"/>
+        </StackPanel>
+       </Border>
+       <Button Content="接入其他项目" HorizontalContentAlignment="Left" Click="Deploy_Click" ToolTip="把发布后的单文件 Launcher.exe 安全复制到已有项目" Margin="0,0,0,7"/>
+       <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <Button Content="切换项目" FontSize="11" Padding="9,6" Click="SwitchProject_Click" ToolTip="打开另一个项目的 launcher.yaml"/>
+        <Button Grid.Column="1" Content="◐" Width="32" Padding="0" Style="{StaticResource TextButton}" Click="Theme_Click" ToolTip="切换深色 / 浅色"/>
+        <Button Grid.Column="2" Content="?" Width="26" Padding="0" Style="{StaticResource TextButton}" Click="About_Click" ToolTip="关于与快捷键"/>
+       </Grid>
+      </StackPanel>
+     </Grid>
+    </Border>
+    <Grid Grid.Column="1" Margin="28,21,28,18">
+     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/></Grid.RowDefinitions>
+     <Border Visibility="{Binding HasNotification, Converter={StaticResource BoolVisibility}}" Background="{DynamicResource AccentSoftBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="12,9" Margin="0,0,0,14">
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+       <TextBlock Text="{Binding Notification}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12"/>
+       <Button Grid.Column="1" Content="详情" Style="{StaticResource TextButton}" Padding="10,3" Click="NoticeDetail_Click"/>
+       <Button Grid.Column="2" Content="×" Style="{StaticResource TextButton}" Padding="8,3" Click="DismissNotice_Click"/>
+      </Grid>
+     </Border>
+     <ContentControl Grid.Row="1" x:Name="PageHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+    </Grid>
+   </Grid>
+   <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource SidebarBackground}">
+    <Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="204"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,8,0"/><TextBlock Text="本地运行 · 非 Web 服务" FontSize="10.5" Foreground="{DynamicResource MutedTextBrush}"/></StackPanel>
+     <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="10.5" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+     <TextBlock Grid.Column="2" Text="{Binding AppVersion}" FontSize="10" Foreground="{DynamicResource MutedTextBrush}" VerticalAlignment="Center"/>
+    </Grid>
+   </Border>
+  </Grid>
+ </Border>
+</Window>

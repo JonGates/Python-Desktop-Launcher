@@ -1,0 +1,16 @@
+# Copy to the existing project's root as launcher.yaml; review main.py and environment first.
+schema_version: 1
+app:
+  name: 我的 Python 项目
+  description: 请在项目设置中配置入口与参数。
+runtime:
+  mode: venv
+  project_dir: .
+  venv: .venv
+  requirements: ''
+actions:
+  - id: run
+    label: 启动项目
+    argv: [python, main.py]
+    parameters: []
+parameters: []

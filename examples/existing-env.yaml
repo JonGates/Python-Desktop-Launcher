@@ -1,0 +1,17 @@
+schema_version: 1
+app:
+  name: 已有虚拟环境项目
+runtime:
+  mode: existing
+  project_dir: .
+  venv: .venv
+actions:
+  - id: run
+    label: 主程序
+    argv: [python, main.py]
+    parameters: []
+  - id: tests
+    label: 单元测试
+    argv: [python, -m, pytest, -q]
+    parameters: []
+parameters: []

@@ -1,0 +1,101 @@
+schema_version: 1
+app:
+  name: 文本批处理 · Launcher Demo
+  description: 配置参数后开始处理。首次使用请先打开「环境管理」初始化项目环境。
+  version: 1.0.0
+  output_dir: demo/output
+runtime:
+  mode: venv
+  project_dir: .
+  venv: .venv
+  python: ''
+  requirements: ''
+  shell: auto
+  env: {}
+actions:
+  - id: run
+    label: 处理文本
+    argv: [python, demo/demo_task.py]
+    parameters: [input, output, mode, repeat, prefix, overwrite, delay, fail, token, note]
+  - id: probe
+    label: 验证项目环境
+    argv: [python, demo/environment_probe.py]
+    parameters: []
+  - id: help
+    label: 查看脚本帮助
+    argv: [python, demo/demo_task.py, --help]
+    parameters: []
+parameters:
+  - name: input
+    label: 输入文件
+    type: file
+    argument: --input
+    default: demo/input/sample.txt
+    required: true
+    must_exist: true
+    description: 选择 UTF-8 文本文件，支持中文和带空格的路径。
+  - name: output
+    label: 输出目录
+    type: directory
+    argument: --output
+    default: demo/output
+    required: true
+    description: 输出 result.txt 和 summary.json；目录由 Demo 创建。
+  - name: mode
+    label: 转换方式
+    type: select
+    argument: --mode
+    options: [upper, lower, title]
+    default: upper
+    description: upper 大写；lower 小写；title 单词首字母大写。
+  - name: repeat
+    label: 重复次数
+    type: integer
+    argument: --repeat
+    default: 2
+    min: 1
+    max: 20
+    description: 重复处理输入内容，可观察日志和进度。
+  - name: prefix
+    label: 结果行前缀
+    type: text
+    argument: --prefix
+    default: Processed
+    description: 每行结果前添加的文字，不需要手动添加引号。
+  - name: overwrite
+    label: 覆盖已有文件
+    type: boolean
+    argument: --overwrite
+    default: false
+    description: 默认保护已有结果；重复演示时可以打开。
+  - name: delay
+    label: 每行延迟（秒）
+    type: number
+    argument: --delay
+    default: 0.1
+    min: 0
+    max: 2
+    advanced: true
+    description: Demo 用于展示实时进度；业务项目可删除此参数。
+  - name: fail
+    label: 模拟执行失败
+    type: boolean
+    argument: --fail
+    default: false
+    advanced: true
+    description: 打开后返回退出码 5，用于验证错误提示。
+  - name: token
+    label: API 密钥示例
+    type: password
+    binding: env
+    env_name: DEMO_API_TOKEN
+    advanced: true
+    description: 通过环境变量传给 Demo，不会写入预设或命令行。
+  - name: note
+    label: 标题模式备注
+    type: textarea
+    binding: env
+    env_name: DEMO_NOTE
+    default: ''
+    visible_when: {mode: title}
+    description: 仅在 title 模式下显示；此普通备注写入 summary.json。

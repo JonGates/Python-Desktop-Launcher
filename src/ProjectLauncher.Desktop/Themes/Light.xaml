@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="AppBackground" Color="#F5F6FB"/>
+  <SolidColorBrush x:Key="SidebarBackground" Color="#ECEEF7"/>
+  <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="PanelBackground" Color="#F8F9FC"/>
+  <SolidColorBrush x:Key="InputBackground" Color="#F9FAFD"/>
+  <SolidColorBrush x:Key="HoverBackground" Color="#EBEDF7"/>
+  <SolidColorBrush x:Key="BorderBrush" Color="#E0E4EE"/>
+  <SolidColorBrush x:Key="PrimaryText" Color="#20263B"/>
+  <SolidColorBrush x:Key="SecondaryText" Color="#64718B"/>
+  <SolidColorBrush x:Key="MutedTextBrush" Color="#75819A"/>
+  <SolidColorBrush x:Key="AccentBrush" Color="#625CE0"/>
+  <SolidColorBrush x:Key="AccentSoftBrush" Color="#EEECFD"/>
+  <SolidColorBrush x:Key="AccentForeground" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="SuccessBrush" Color="#187F62"/>
+  <SolidColorBrush x:Key="SuccessSoftBrush" Color="#E4F6EF"/>
+  <SolidColorBrush x:Key="WarningBrush" Color="#9A631B"/>
+  <SolidColorBrush x:Key="WarningSoftBrush" Color="#FFF3DF"/>
+  <SolidColorBrush x:Key="DangerBrush" Color="#C04662"/>
+  <SolidColorBrush x:Key="DangerSoftBrush" Color="#FFF0F2"/>
+  <SolidColorBrush x:Key="TerminalBackground" Color="#111522"/>
+  <SolidColorBrush x:Key="TerminalForeground" Color="#DCE3F2"/>
+  <LinearGradientBrush x:Key="HeroGradient" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#EBE8FE" Offset="0"/><GradientStop Color="#EAF2FF" Offset="1"/></LinearGradientBrush>
+  <LinearGradientBrush x:Key="LogoGradient" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#9187FF" Offset="0"/><GradientStop Color="#615DDD" Offset="1"/></LinearGradientBrush>
+</ResourceDictionary>

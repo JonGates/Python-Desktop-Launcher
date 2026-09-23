@@ -1,0 +1,20 @@
+schema_version: 1
+app:
+  name: uv 项目演示
+  description: 在本目录放入发布后的 Launcher.exe，然后显式同步环境。
+runtime:
+  mode: uv
+  project_dir: .
+  venv: .venv
+actions:
+  - id: greet
+    label: 打个招呼
+    argv: [python, app.py]
+    parameters: [who]
+parameters:
+  - name: who
+    label: 怎么称呼你
+    description: 作为一个完整 argv 值传递，中文与空格无需额外加引号。
+    type: text
+    argument: --who
+    default: 朋友

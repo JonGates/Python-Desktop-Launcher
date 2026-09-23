@@ -1,0 +1,18 @@
+test_bad_delay (test_demo.DemoTests.test_bad_delay) ... ok
+test_environment_probe_json (test_demo.DemoTests.test_environment_probe_json) ... ok
+test_explicit_overwrite (test_demo.DemoTests.test_explicit_overwrite) ... ok
+test_failure_code_and_no_output (test_demo.DemoTests.test_failure_code_and_no_output) ... ok
+test_input_output_collision_refused (test_demo.DemoTests.test_input_output_collision_refused) ... ok
+test_lowercase (test_demo.DemoTests.test_lowercase) ... ok
+test_missing_input_failure (test_demo.DemoTests.test_missing_input_failure) ... ok
+test_notes_multiline_and_blank_lines (test_demo.DemoTests.test_notes_multiline_and_blank_lines) ... ok
+test_prefix_preserves_whitespace_and_metacharacters (test_demo.DemoTests.test_prefix_preserves_whitespace_and_metacharacters) ... ok
+test_refuses_overwrite (test_demo.DemoTests.test_refuses_overwrite) ... ok
+test_repeat_and_actual_progress (test_demo.DemoTests.test_repeat_and_actual_progress) ... ok
+test_secret_not_leaked (test_demo.DemoTests.test_secret_not_leaked) ... ok
+test_unicode_and_spaces (test_demo.DemoTests.test_unicode_and_spaces) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 9.336s
+
+OK

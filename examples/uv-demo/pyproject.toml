@@ -1,0 +1,6 @@
+[project]
+name = "project-launcher-uv-demo"
+version = "1.0.0"
+description = "An offline-capable standard-library demo for the C# project launcher"
+requires-python = ">=3.11"
+dependencies = []
