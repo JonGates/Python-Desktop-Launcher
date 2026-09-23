@@ -69,12 +69,14 @@ internal static class ActionQuickControlSmoke
             Descendants<Button>(window.TerminalPage).Single(b => Equals(b.Content, "＋ CMD")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             await Until(() => window.TerminalPage.Tabs.Count == 1 && !window.TerminalPage.Tabs[0].Starting);
             var tab = window.TerminalPage.Tabs[0];
-            tab.Session.Write("set LAUNCHER_LANGUAGE_PROBE=retained\r");
-            await Until(() => tab.Control.Screen.PlainText(true).Contains("LAUNCHER_LANGUAGE_PROBE=retained"));
+            // Wait for shell output, not the echoed command (a long prompt may wrap it).
+            bool HasLine(string expected) => tab.Control.Screen.PlainText(true).Split('\n').Any(line => line.Trim() == expected);
+            tab.Session.Write("@set LAUNCHER_LANGUAGE_PROBE=retained\r@echo READY_LANGUAGE_PROBE\r");
+            await Until(() => HasLine("READY_LANGUAGE_PROBE"));
             LocalizationService.Current.SetLanguage("en-US"); await Idle(window);
             if (!ReferenceEquals(tab, window.TerminalPage.Tabs.Single()) || !tab.Session.IsRunning) throw new Exception("Language switch replaced terminal session.");
             tab.Session.Write("echo PERSISTED_%LAUNCHER_LANGUAGE_PROBE%\r");
-            await Until(() => tab.Control.Screen.PlainText(true).Contains("PERSISTED_retained"));
+            await Until(() => HasLine("PERSISTED_retained"));
             LocalizationService.Current.SetLanguage("zh-CN"); await window.TerminalPage.CloseAllAsync();
             results.Add("PASS language switch preserves running job output and live ConPTY environment state");
             results.Add("PASS sidebar start uses current parameters, stop/cancel from terminal, per-action busy guard and completion reset");
