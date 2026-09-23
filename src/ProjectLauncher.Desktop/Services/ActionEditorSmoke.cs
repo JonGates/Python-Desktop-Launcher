@@ -35,6 +35,10 @@ internal static class ActionEditorSmoke
             await Idle(window);
             if (Descendants<ParameterForm>(workspace).Any()) throw new Exception("Draft preview still present.");
             if (!Descendants<TextBlock>(workspace).Any(t => t.Text == "端口")) throw new Exception("Parameter list missing saved field.");
+            var addParameter = Descendants<Button>(workspace).Single(b => Equals(b.Content, "＋ 添加参数"));
+            var parameterHeading = Descendants<TextBlock>(workspace).First(t => t.Text == "运行参数");
+            if (Math.Abs(addParameter.TransformToAncestor(workspace).Transform(new Point()).Y - parameterHeading.TransformToAncestor(workspace).Transform(new Point()).Y) > 18)
+                throw new Exception("Add parameter must be in the parameter heading row, not below the list.");
             var link = (System.Windows.Documents.Hyperlink)window.FindName("OfficialSiteLink");
             if (link.NavigateUri.AbsoluteUri != "https://github.com/JonGates/Python-Desktop-Launcher" ||
                 new System.Windows.Documents.TextRange(link.ContentStart, link.ContentEnd).Text != "Python-Desktop-Launcher 官网")

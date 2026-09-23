@@ -13,6 +13,11 @@ internal static class ActionNavigationSmoke
 {
     public static async Task RunAsync(MainWindow window, string directory, List<string> results)
     {
+        if (window.FindName("SidebarProjectName") is not TextBlock projectName || projectName.Text != window.Shell.ProjectName)
+            throw new Exception("Sidebar project branding is missing.");
+        if (window.FindName("SidebarProjectDescription") is not TextBlock description || description.Text != window.Shell.ProjectDescription ||
+            window.FindName("SidebarProjectVersion") is not TextBlock version || version.Text != window.Shell.ProjectVersion)
+            throw new Exception("Sidebar description/version does not reflect project configuration.");
         if (window.SettingsPage.FindName("ActionWorkspaceHost") is not ContentControl)
             throw new InvalidOperationException("Unified action editor is missing.");
         await ActionEditorSmoke.RunAsync(directory, results);

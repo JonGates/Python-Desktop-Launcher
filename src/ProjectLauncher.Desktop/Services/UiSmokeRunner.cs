@@ -24,6 +24,7 @@ internal static class UiSmokeRunner
         {
             await ActionNavigationSmoke.RunAsync(window, directory, results);
             await ActionQuickControlSmoke.RunAsync(directory, results);
+            await ThemeControlSmoke.RunAsync(directory, results);
             window.Width = 1360; window.Height = 920;
             foreach (string theme in new[] { "dark", "light" })
             {

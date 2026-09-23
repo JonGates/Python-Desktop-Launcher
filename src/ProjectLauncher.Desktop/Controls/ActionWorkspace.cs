@@ -138,9 +138,12 @@ public sealed class ActionWorkspace : UserControl
                 if (kind != "module") { var browse = Button("浏览…", () => { var root = new ProjectEnvironment(_draft, Path.Combine(_root, "launcher.yaml")).Root; var d = new OpenFileDialog { InitialDirectory = root, Filter = kind == "script" ? "Python|*.py|所有文件|*.*" : "程序|*.exe|所有文件|*.*" }; if (d.ShowDialog(Window.GetWindow(this)) == true) box.Text = ActionEditing.BrowsedTarget(root, d.FileName); }); DockPanel.SetDock(browse, Dock.Right); line.Children.Add(browse); }
                 line.Children.Add(box); _editor.Children.Add(line);
             }
-            _editor.Children.Add(Label("运行参数", true));
+            var parameterHeading = new DockPanel { Margin = new(0, 8, 0, 10) };
+            var addParameter = Button("＋ 添加参数", () => EditParameter(null, action));
+            DockPanel.SetDock(addParameter, Dock.Right); parameterHeading.Children.Add(addParameter);
+            var heading = Label("运行参数", true); heading.Margin = new(0); heading.VerticalAlignment = VerticalAlignment.Center;
+            parameterHeading.Children.Add(heading); _editor.Children.Add(parameterHeading);
             foreach (var p in CommandBuilder.SelectedParameters(_draft, action).ToArray()) AddParameterRow(p, action);
-            _editor.Children.Add(Button("＋ 添加参数", () => EditParameter(null, action)));
             var advanced = new StackPanel(); advanced.Children.Add(Label("内部 ID（自动生成）")); advanced.Children.Add(new TextBox { Text = action.Id, IsReadOnly = true });
             advanced.Children.Add(Label("超时秒数 · 0 不限时")); advanced.Children.Add(Text(action.TimeoutSeconds.ToString(), v => action.TimeoutSeconds = int.TryParse(v, out int n) && n >= 0 ? n : throw new ConfigException("超时必须为非负整数。")));
             _editor.Children.Add(new Expander { Header = "动作高级设置", Content = advanced, Margin = new(0, 12, 0, 0) });

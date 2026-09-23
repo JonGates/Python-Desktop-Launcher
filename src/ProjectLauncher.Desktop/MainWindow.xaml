@@ -43,8 +43,8 @@
      <Grid Margin="16,16,16,14">
       <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/><RowDefinition Height="0"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <StackPanel Margin="8,2,4,24">
-       <TextBlock Text="Project Launcher" FontWeight="SemiBold" FontSize="16"/>
-       <TextBlock Text="一个应用 · 多个启动动作" FontSize="10.5" Margin="0,6,0,0" Foreground="{DynamicResource MutedTextBrush}"/>
+       <TextBlock x:Name="SidebarProjectName" Text="{Binding ProjectName}" FontWeight="SemiBold" FontSize="16" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectName}"/>
+       <TextBlock x:Name="SidebarProjectDescription" Text="{Binding ProjectDescription}" FontSize="10.5" Margin="0,6,0,0" Foreground="{DynamicResource MutedTextBrush}" MaxHeight="42" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectDescription}"/>
       </StackPanel>
       <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel x:Name="Navigation">
@@ -98,7 +98,7 @@
    </Grid>
    <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource SidebarBackground}">
     <Grid Margin="18,0"><Grid.ColumnDefinitions><ColumnDefinition Width="204"/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,8,0"/><TextBlock Text="本地运行 · 非 Web 服务" FontSize="10.5" Foreground="{DynamicResource MutedTextBrush}"/></StackPanel>
+     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Ellipse Width="6" Height="6" Fill="{DynamicResource AccentBrush}" Margin="0,0,8,0"/><TextBlock x:Name="SidebarProjectVersion" Text="{Binding ProjectVersion}" FontSize="10.5" MaxWidth="180" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding ProjectVersion}" Foreground="{DynamicResource MutedTextBrush}"/></StackPanel>
      <TextBlock Grid.Column="1" Text="{Binding Status}" FontSize="10.5" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
      <TextBlock Grid.Column="2" FontSize="11" VerticalAlignment="Center"><Hyperlink x:Name="OfficialSiteLink" NavigateUri="https://github.com/JonGates/Python-Desktop-Launcher" RequestNavigate="OfficialSite_RequestNavigate" Foreground="{DynamicResource MutedTextBrush}" ToolTip="打开项目 GitHub 官网">Python-Desktop-Launcher 官网</Hyperlink></TextBlock>
     </Grid>

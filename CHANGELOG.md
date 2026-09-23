@@ -1,5 +1,12 @@
 # Change log
 
+## Theme controls and project identity
+
+- Fixed tab header right-edge clipping by preserving inter-tab spacing.
+- Added compact rounded theme-aware vertical and horizontal scrollbars, including hover/drag states.
+- Sidebar header now shows the project's name and description; the bottom-left status area shows its version.
+- Moved Add parameter to the right side of the parameter section heading.
+
 ## Sidebar action quick controls
 
 - Added a green start triangle and red stop circle beside each action, with operation tooltips.
