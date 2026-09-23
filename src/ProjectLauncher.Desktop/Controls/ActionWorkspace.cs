@@ -15,7 +15,7 @@ public sealed class ActionWorkspace : UserControl
     private readonly Action _changed;
     private readonly ListBox _actions = new() { Name = "SettingsActionList" };
     private readonly StackPanel _editor = new();
-    private readonly TextBlock _error = new() { TextWrapping = TextWrapping.Wrap };
+    public event Action<string?>? ValidationNotice;
     private readonly Dictionary<Control, string> _errors = new();
     private ActionDefinition? _action;
     private bool _building;
@@ -27,7 +27,7 @@ public sealed class ActionWorkspace : UserControl
         _draft = draft; _root = root; _changed = changed;
         var grid = new Grid(); grid.ColumnDefinitions.Add(new() { Width = new(184) });
         grid.ColumnDefinitions.Add(new() { Width = new(12) }); grid.ColumnDefinitions.Add(new());
-        grid.RowDefinitions.Add(new()); grid.RowDefinitions.Add(new() { Height = GridLength.Auto });
+        grid.RowDefinitions.Add(new());
         var listPanel = new Grid(); listPanel.RowDefinitions.Add(new() { Height = GridLength.Auto });
         listPanel.RowDefinitions.Add(new()); listPanel.RowDefinitions.Add(new() { Height = GridLength.Auto });
         var listTitle = Label("启动动作", true); listTitle.Margin = new(0, 0, 0, 10); listPanel.Children.Add(listTitle);
@@ -47,8 +47,6 @@ public sealed class ActionWorkspace : UserControl
         var listCard = Card(listPanel); listCard.Padding = new(10, 14, 10, 10); grid.Children.Add(listCard);
         var card = Card(new ScrollViewer { Content = _editor, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled });
         Grid.SetColumn(card, 2); grid.Children.Add(card);
-        _error.SetResourceReference(TextBlock.ForegroundProperty, "DangerBrush");
-        _error.Margin = new(0, 8, 0, 0); Grid.SetRow(_error, 1); Grid.SetColumn(_error, 2); grid.Children.Add(_error);
         Content = grid;
         _actions.SelectionChanged += (_, _) => { if (_building) return; if (!CanRebuild()) { _building = true; _actions.SelectedItem = _action; _building = false; return; } _action = _actions.SelectedItem as ActionDefinition; Rebuild(); };
         RefreshActions(draft.Actions.FirstOrDefault());
@@ -58,11 +56,11 @@ public sealed class ActionWorkspace : UserControl
     private static TextBlock Label(string text, bool title = false)
     { var t = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap, Margin = new(0, title ? 10 : 4, 0, 7) }; t.SetResourceReference(StyleProperty, title ? "FieldLabel" : "Hint"); return t; }
     private Button Button(string text, Action click)
-    { var b = new Button { Content = text, Padding = new(10, 6, 10, 6), MinHeight = 32, Margin = new(4, 0, 0, 0) }; b.Click += (_, _) => { if (!CanRebuild()) return; try { click(); } catch (Exception ex) { _error.Text = ex.Message; } }; return b; }
+    { var b = new Button { Content = text, Padding = new(10, 6, 10, 6), MinHeight = 32, Margin = new(4, 0, 0, 0) }; b.Click += (_, _) => { if (!CanRebuild()) return; try { click(); } catch (Exception ex) { ValidationNotice?.Invoke(ex.Message); } }; return b; }
     private bool CanRebuild()
     {
         if (_errors.Count == 0) return true;
-        var first = _errors.First(); _error.Text = first.Value;
+        var first = _errors.First(); ValidationNotice?.Invoke(first.Value);
         first.Key.BringIntoView(); first.Key.Focus(); return false;
     }
     private TextBox Text(string value, Action<string> write, bool multiline = false)
@@ -105,7 +103,7 @@ public sealed class ActionWorkspace : UserControl
     }
     private void AddAction()
     {
-        if (_errors.Count != 0) { _error.Text = "请先修正当前字段。"; return; }
+        if (_errors.Count != 0) { ValidationNotice?.Invoke("请先修正当前字段。"); return; }
         RefreshActions(ActionEditing.AddAction(_draft)); _changed();
     }
     private void DeleteAction()
@@ -208,7 +206,7 @@ public sealed class ActionWorkspace : UserControl
     private void RefreshPreview()
     {
         // Validation feedback only; settings no longer hosts a runnable form or draft preview.
-        try { Commit(); _error.Text = ""; }
-        catch (Exception ex) { _error.Text = ex.Message; }
+        try { Commit(); ValidationNotice?.Invoke(null); }
+        catch (ConfigException) { /* Report only when an operation is blocked, not on every keystroke. */ }
     }
 }

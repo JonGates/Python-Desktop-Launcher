@@ -46,6 +46,7 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
     public string Notification { get => _notification; private set { Set(ref _notification, value); Raise(nameof(HasNotification)); } }
     public bool HasNotification => Notification.Length > 0;
     public string NotificationDetail { get; private set; } = "";
+    private string _notificationSource = "";
     private string _environmentVersion = "尚未检查";
     public string EnvironmentVersion { get => _environmentVersion; private set => Set(ref _environmentVersion, value); }
     private string _environmentDetail = "解释器检查会实际启动项目 Python；依赖安装由你手动确认。";
@@ -71,13 +72,16 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
         _timer.Tick += (_, _) => FlushLog(); _timer.Start();
     }
     public void Navigate(string page) => NavigationRequested?.Invoke(page);
-    public void Notify(string message)
+    public void Notify(string message) => Notify(message, "general");
+    public void Notify(string message, string source)
     {
-        if (!Application.Current.Dispatcher.CheckAccess()) { Application.Current.Dispatcher.InvokeAsync(() => Notify(message)); return; }
+        if (!Application.Current.Dispatcher.CheckAccess()) { Application.Current.Dispatcher.InvokeAsync(() => Notify(message, source)); return; }
+        _notificationSource = source;
         NotificationDetail = message;
         Notification = message.Length <= 240 ? message : message[..240] + "…";
     }
     public void DismissNotification() => Notification = "";
+    public void ClearNotification(string source) { if (_notificationSource == source) DismissNotification(); }
     public void SaveState()
     {
         try { StateStore.Save(Runtime.StateDirectory, State, Config); }

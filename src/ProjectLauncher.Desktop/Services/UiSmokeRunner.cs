@@ -22,6 +22,7 @@ internal static class UiSmokeRunner
         var results = new List<string>();
         try
         {
+            await ToastSmoke.RunAsync(directory, results);
             await ActionNavigationSmoke.RunAsync(window, directory, results);
             await ActionQuickControlSmoke.RunAsync(directory, results);
             await ThemeControlSmoke.RunAsync(directory, results);
