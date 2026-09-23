@@ -23,6 +23,7 @@ internal static class UiSmokeRunner
         try
         {
             await LocalizationSmoke.RunAsync(directory, results);
+            await BilingualLayoutSmoke.RunAsync(directory, results);
             await ToastSmoke.RunAsync(directory, results);
             await ActionNavigationSmoke.RunAsync(window, directory, results);
             await ActionQuickControlSmoke.RunAsync(directory, results);

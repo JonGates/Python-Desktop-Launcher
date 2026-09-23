@@ -38,6 +38,17 @@ internal static class ToastSmoke
                 var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)window.ActualWidth, (int)window.ActualHeight, 96, 96, PixelFormats.Pbgra32);
                 bitmap.Render(window); png.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
                 using (var file = File.Create(Path.Combine(directory, theme + "-toast.png"))) png.Save(file);
+                Exception? detailError = null;
+                window.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => {
+                    var dialog = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.Owner == window);
+                    try {
+                        if (dialog is null || !Descendants<TextBox>(dialog).Any(t => t.Text.Length == 1200))
+                            throw new Exception("Toast details lost the full error message.");
+                    } catch (Exception ex) { detailError = ex; }
+                    finally { dialog?.Close(); }
+                }));
+                Descendants<Button>(toast).Single(b => Equals(b.Content, L.Text("Ui.018"))).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                if (detailError is not null) throw detailError;
                 Descendants<Button>(toast).Single(b => Equals(b.Content, "×")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 await Idle(window);
                 if (window.Shell.HasNotification) throw new Exception("Toast close button did not dismiss.");

@@ -9,7 +9,7 @@ Add-Type -AssemblyName UIAutomationTypes
 $runRoot = Join-Path $root ('artifacts/portable-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $runRoot | Out-Null
 $results = [Collections.Generic.List[string]]::new()
-function Wait-Window($Process, [string]$Title) {
+function Wait-Window($Process, [string]$Title, [string]$RequiredControlId = '') {
     $deadline = [DateTime]::UtcNow.AddSeconds(25)
     do {
         $Process.Refresh()
@@ -17,7 +17,15 @@ function Wait-Window($Process, [string]$Title) {
         $windows = [Windows.Automation.AutomationElement]::RootElement.FindAll(
             [Windows.Automation.TreeScope]::Children,
             [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::ProcessIdProperty, $Process.Id))
-        foreach ($window in $windows) { if ($window.Current.Name -like $Title) { return $window } }
+        foreach ($window in $windows) {
+            if ($window.Current.Name -notlike $Title) { continue }
+            if ($RequiredControlId) {
+                $required = $window.FindFirst([Windows.Automation.TreeScope]::Descendants,
+                    [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::AutomationIdProperty, $RequiredControlId))
+                if (-not $required) { continue }
+            }
+            return $window
+        }
         Start-Sleep -Milliseconds 100
     } while ([DateTime]::UtcNow -lt $deadline)
     throw "Window not found: $Title"
@@ -45,7 +53,7 @@ try {
         # A different working directory proves startup uses the EXE's directory.
         $process = Start-Process -FilePath (Join-Path $project 'Launcher.exe') -WorkingDirectory $root -WindowStyle Hidden -PassThru
         try {
-            $window = Wait-Window $process '首次接入*'
+            $window = Wait-Window $process '*' 'ProjectPath'
             $pathControl = Control $window 'ProjectPath'
             $value = $pathControl.GetCurrentPattern([Windows.Automation.ValuePattern]::Pattern)
             if ($value.Current.Value -ne $project) { throw 'Startup used the working directory instead of the EXE directory.' }
