@@ -26,6 +26,8 @@ internal static class ActionEditorSmoke
             if (settings.HasUnsavedChanges) throw new Exception("Opening settings dirtied the draft.");
             var workspace = (ActionWorkspace)((ContentControl)settings.FindName("ActionWorkspaceHost")).Content;
             Click(workspace, "＋ 添加动作"); await Idle(window);
+            var actionList = Descendants<ListBox>(workspace).SingleOrDefault(l => l.SelectedItem is ActionDefinition);
+            if (actionList is null) throw new Exception("Settings actions must be a persistent list, not a dropdown.");
             Descendants<TextBox>(workspace).First(t => t.Text == "新的启动动作").Text = "启动服务";
             Descendants<TextBox>(workspace).First(t => !t.IsReadOnly && t.Text == "").Text = "service.py";
             Modal(workspace, "＋ 添加参数", dialog => {
@@ -107,8 +109,16 @@ internal static class ActionEditorSmoke
         await Check("invalid switching", (editor, config) => {
             var timeout = Descendants<Expander>(editor).First(e => Equals(e.Header, "动作高级设置")); timeout.IsExpanded = true; editor.UpdateLayout();
             Descendants<TextBox>(timeout).First(t => !t.IsReadOnly).Text = "bad";
-            Descendants<ComboBox>(editor).First(c => c.SelectedItem is ActionDefinition).SelectedIndex = 1;
+            Descendants<ListBox>(editor).First(c => c.SelectedItem is ActionDefinition).SelectedIndex = 1;
             if (editor.SelectedActionId != "one" || !Descendants<TextBox>(timeout).Any(t => t.Text == "bad")) throw new Exception("Invalid draft lost on selection.");
+        });
+        await Check("list switching retains edits", (editor, config) => {
+            Descendants<TextBox>(editor).First(t => t.Text == config.Actions[0].Label).Text = "服务已改名";
+            Descendants<TextBox>(editor).First(t => t.Text == "main.py").Text = "service.py";
+            var list = Descendants<ListBox>(editor).Single(); list.SelectedIndex = 1;
+            if (editor.SelectedActionId != "two" || config.Actions[0].Label != "服务已改名" || config.Actions[0].Argv[1] != "service.py") throw new Exception("List switch lost first action edits.");
+            list.SelectedIndex = 0;
+            if (!Descendants<TextBox>(editor).Any(t => t.Text == "service.py")) throw new Exception("Returning to action did not restore its editor.");
         });
         await Check("invalid add parameter", (editor, config) => {
             var timeout = Descendants<Expander>(editor).First(e => Equals(e.Header, "动作高级设置")); timeout.IsExpanded = true; editor.UpdateLayout();

@@ -1,5 +1,11 @@
 # Change log
 
+## Action settings split layout
+
+- Replaced the action dropdown with a persistent left-side list and independently scrolling configuration panel.
+- Moved action add/delete controls below the list; preserved parameter dialogs and bottom-page save controls.
+- Verified action switching preserves edits and invalid fields continue to block disruptive selection changes.
+
 ## Theme controls and project identity
 
 - Fixed tab header right-edge clipping by preserving inter-tab spacing.

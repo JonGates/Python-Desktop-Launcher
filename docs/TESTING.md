@@ -13,9 +13,9 @@
 | Windows ConPTY / Job / 项目锁测试 | 已执行，通过 | 4 项通过；包含父进程标准流重定向时的 ConPTY 输入回归 |
 | WPF 深浅色截图与绑定错误检查 | 已执行，通过 | 24 张原生 WPF 图片：原有四页面 8 张、首次接入三种环境状态 6 张、紧凑动作界面 2 张、动作编辑器 2 张、参数弹窗 2 张、侧栏运行状态 2 张、主题控件 2 张；含创建配置、取消与配置中途出现的检查，共 26 项 PASS |
 | Python Demo 自动化测试 | 已执行，通过 | 13 tests，OK；只验证示例业务脚本 |
-| 静态源码检查 | 已执行，通过 | 636 passed，0 failed；不是 C# 编译器或 WPF 运行时 |
+| 静态源码检查 | 已执行，通过 | 644 passed，0 failed；不是 C# 编译器或 WPF 运行时 |
 | 源码文件 SHA-256 | 已更新 | 根目录 `MANIFEST.sha256`；仅代表所列源码文件完整性 |
-| 单文件自包含 Windows EXE | 已执行，通过 | `Test-Windows.ps1` 与 `Build.ps1` 成功生成 GUI / CLI EXE，以及 portable / demo ZIP；GUI EXE 65,105,796 字节 |
+| 单文件自包含 Windows EXE | 已执行，通过 | `Test-Windows.ps1` 与 `Build.ps1` 成功生成 GUI / CLI EXE，以及 portable / demo ZIP；GUI EXE 65,106,817 字节 |
 | 复制单个 EXE 到项目 | 已执行，通过 | `tools/Test-Portable.ps1`：5 项 PASS；真实 UI Automation 操作已有环境、无环境、取消、已有配置重开，并实际探测绑定的 Python 3.12.10 环境；正常关闭通过 |
 | 人工 DPI / IME / 完整工作流 | **未执行** | 仍须按下方清单在交互式桌面逐项验收 |
 
@@ -32,12 +32,14 @@
 `artifacts/portable/Launcher.exe` 的 SHA-256：
 
 ```text
-4CFDBEFF4B40F5E92C18552D6AF67B95CB6C909AB009A9EB0AB12D011D33BA3C
+964E24094DC175616F6BD02937EC87C6989955DDBF749E763BC075CFB6370E40
 ```
 
 单文件测试目录只有复制的 EXE 和项目自身文件，运行时确认 WPF 原生组件来自 EXE 的临时解包目录。尚未在未安装 .NET 的独立测试机上验收。下载过慢的两个运行时包通过镜像获取后，逐个比对 NuGet 官方响应中的 SHA-512，均一致；仓库 NuGet 源配置未改动。
 
 ## 可复核的本地检查
+
+动作配置的分栏回归还覆盖左侧列表存在、切换保留待保存修改、返回动作恢复编辑值，以及字段错误时阻止切换。紧凑编辑器截图使用 1060×700 原生窗口。
 
 ```powershell
 python -m unittest discover -s tests/demo -v
@@ -75,7 +77,7 @@ WPF 检查遍历四个页面与深/浅主题，使用 `RenderTargetBitmap` 导�
 
 此外，首次接入窗口在深/浅主题下分别测试 0 / 1 / 2 个环境，生成另 6 张图片；操作真实 WPF 按钮验证不要求入口、多个环境必须选择、生成配置、取消以及配置文件中途出现时保持原文。环境文件是结构测试 fixture，不执行其中的解释器。
 
-发布后运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1`，可复核只复制一个 EXE 的接入流程。脚本会在 `artifacts/portable-test-*` 中创建隔离的真实虚拟环境，并使用 Windows UI Automation 操作测试窗口。本轮报告位于 `artifacts/portable-test-72e51a34de4e4b939217bcc96f01921c/report.txt`。
+发布后运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1`，可复核只复制一个 EXE 的接入流程。脚本会在 `artifacts/portable-test-*` 中创建隔离的真实虚拟环境，并使用 Windows UI Automation 操作测试窗口。本轮报告位于 `artifacts/portable-test-8526243eeaeb44d08030b95cdb05b93e/report.txt`。
 
 自动截图检查也有边界：它不覆盖所有鼠标/键盘交互、所有启动阶段绑定错误、IME、不同缩放和全部 TUI 兼容。不能仅凭自动截图宣告产品已经验收。
 

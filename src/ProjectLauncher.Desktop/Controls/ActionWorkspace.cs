@@ -13,7 +13,7 @@ public sealed class ActionWorkspace : UserControl
     private readonly LauncherConfig _draft;
     private readonly string _root;
     private readonly Action _changed;
-    private readonly ComboBox _actions = new() { MinWidth = 180 };
+    private readonly ListBox _actions = new() { Name = "SettingsActionList" };
     private readonly StackPanel _editor = new();
     private readonly TextBlock _error = new() { TextWrapping = TextWrapping.Wrap };
     private readonly Dictionary<Control, string> _errors = new();
@@ -25,16 +25,30 @@ public sealed class ActionWorkspace : UserControl
     public ActionWorkspace(LauncherConfig draft, string root, Action changed)
     {
         _draft = draft; _root = root; _changed = changed;
-        var grid = new Grid(); grid.RowDefinitions.Add(new() { Height = GridLength.Auto }); grid.RowDefinitions.Add(new());
-        var toolbar = new DockPanel { Margin = new(0, 0, 0, 12) };
-        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
-        buttons.Children.Add(Button("＋ 添加动作", AddAction)); buttons.Children.Add(Button("删除动作", DeleteAction));
-        DockPanel.SetDock(buttons, Dock.Right); toolbar.Children.Add(buttons); toolbar.Children.Add(_actions); grid.Children.Add(toolbar);
-        grid.RowDefinitions.Add(new() { Height = GridLength.Auto });
+        var grid = new Grid(); grid.ColumnDefinitions.Add(new() { Width = new(184) });
+        grid.ColumnDefinitions.Add(new() { Width = new(12) }); grid.ColumnDefinitions.Add(new());
+        grid.RowDefinitions.Add(new()); grid.RowDefinitions.Add(new() { Height = GridLength.Auto });
+        var listPanel = new Grid(); listPanel.RowDefinitions.Add(new() { Height = GridLength.Auto });
+        listPanel.RowDefinitions.Add(new()); listPanel.RowDefinitions.Add(new() { Height = GridLength.Auto });
+        var listTitle = Label("启动动作", true); listTitle.Margin = new(0, 0, 0, 10); listPanel.Children.Add(listTitle);
+        ScrollViewer.SetVerticalScrollBarVisibility(_actions, ScrollBarVisibility.Auto);
+        var itemText = new FrameworkElementFactory(typeof(TextBlock));
+        itemText.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("."));
+        itemText.SetBinding(ToolTipProperty, new System.Windows.Data.Binding("."));
+        itemText.SetValue(TextBlock.TextWrappingProperty, TextWrapping.NoWrap);
+        itemText.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis);
+        itemText.SetBinding(TextBlock.ForegroundProperty, new System.Windows.Data.Binding("Foreground") { RelativeSource = new(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(ListBoxItem), 1) });
+        _actions.ItemTemplate = new DataTemplate { VisualTree = itemText };
+        Grid.SetRow(_actions, 1); listPanel.Children.Add(_actions);
+        var buttons = new StackPanel { Margin = new(0, 12, 0, 0) };
+        var add = Button("＋ 添加动作", AddAction); add.Margin = new(0, 0, 0, 6); buttons.Children.Add(add);
+        var delete = Button("删除动作", DeleteAction); delete.Margin = new(0); buttons.Children.Add(delete);
+        Grid.SetRow(buttons, 2); listPanel.Children.Add(buttons);
+        var listCard = Card(listPanel); listCard.Padding = new(10, 14, 10, 10); grid.Children.Add(listCard);
         var card = Card(new ScrollViewer { Content = _editor, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled });
-        Grid.SetRow(card, 1); grid.Children.Add(card);
+        Grid.SetColumn(card, 2); grid.Children.Add(card);
         _error.SetResourceReference(TextBlock.ForegroundProperty, "DangerBrush");
-        _error.Margin = new(0, 8, 0, 0); Grid.SetRow(_error, 2); grid.Children.Add(_error);
+        _error.Margin = new(0, 8, 0, 0); Grid.SetRow(_error, 1); Grid.SetColumn(_error, 2); grid.Children.Add(_error);
         Content = grid;
         _actions.SelectionChanged += (_, _) => { if (_building) return; if (!CanRebuild()) { _building = true; _actions.SelectedItem = _action; _building = false; return; } _action = _actions.SelectedItem as ActionDefinition; Rebuild(); };
         RefreshActions(draft.Actions.FirstOrDefault());
