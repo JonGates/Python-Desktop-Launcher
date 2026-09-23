@@ -84,7 +84,7 @@ public static class ConfigStore
             File.Copy(path, path + ".bak", true);
         }
         else if (expectedHash is not null) throw new ConfigException("配置文件已在磁盘上被删除，请重新加载。");
-        AtomicFile.Write(path, Serialize(config));
+        AtomicFile.Write(path, Serialize(config), overwrite: expectedHash is not null);
         return Load(path);
     }
 
@@ -93,7 +93,7 @@ public static class ConfigStore
 
 public static class AtomicFile
 {
-    public static void Write(string path, string text)
+    public static void Write(string path, string text, bool overwrite = true)
     {
         path = Path.GetFullPath(path);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -105,7 +105,7 @@ public static class AtomicFile
                 var bytes = new UTF8Encoding(false).GetBytes(text);
                 stream.Write(bytes); stream.Flush(true);
             }
-            File.Move(temporary, path, overwrite: true);
+            File.Move(temporary, path, overwrite);
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
     }

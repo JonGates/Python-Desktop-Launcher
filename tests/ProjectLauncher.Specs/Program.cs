@@ -5,7 +5,7 @@ var suite = new SpecSuite();
 await suite.RunAsync();
 return suite.Failed == 0 ? 0 : 1;
 
-sealed class SpecSuite
+sealed partial class SpecSuite
 {
     public int Failed { get; private set; }
     private int _passed;
@@ -112,6 +112,19 @@ sealed class SpecSuite
             Test("missing executable rejected without system fallback", () => Throws(()=>ProjectEnvironment.ResolveExecutable("absolutely_missing_launcher_123",_root,new Dictionary<string,string>{{"PATH",""}})));
             Test("launcher state root cannot be project venv", () => {var c=Simple();c.Runtime.Venv=".launcher";Throws(()=>new ProjectEnvironment(c,Path.Combine(_root,"launcher.yaml")));});
             Test("state Int64 identity preserved", () => {using var json=System.Text.Json.JsonDocument.Parse("9223372036854775806");Eq("9223372036854775806",ValueCodec.Text(ValueCodec.Unwrap(json.RootElement)));});
+            Test("discovery binds an existing custom environment directory", () => {
+                var d = Path.Combine(_root, "custom-environment"); var v = Path.Combine(d, "my env");
+                var scripts = Path.Combine(v, OperatingSystem.IsWindows() ? "Scripts" : "bin"); Directory.CreateDirectory(scripts);
+                File.WriteAllText(Path.Combine(v, "pyvenv.cfg"), "home = test");
+                File.WriteAllText(Path.Combine(scripts, OperatingSystem.IsWindows() ? "python.exe" : "python"), "test fixture, never execute");
+                var c = ProjectInstaller.Discover(d); Eq("existing", c.Runtime.Mode); Eq("my env", c.Runtime.Venv);
+            });
+            Test("discovery does not treat an incomplete environment as existing", () => {
+                var d = Path.Combine(_root, "incomplete-environment"); Directory.CreateDirectory(Path.Combine(d, ".venv"));
+                File.WriteAllText(Path.Combine(d, ".venv", "pyvenv.cfg"), "home = test");
+                Eq("venv", ProjectInstaller.Discover(d).Runtime.Mode);
+            });
+            RunSetupSpecs();
             var shell=OperatingSystem.IsWindows()?"cmd.exe":"/bin/sh";
             var shellArgs=OperatingSystem.IsWindows()?new[]{"/d","/c","echo process-ok"}:new[]{"-c","printf process-ok"};
             await TestAsync("real process produces captured output and exit code", async () => {using var runner=new ProcessRunner();string output="";runner.Output+=x=>output+=x;var result=await runner.RunAsync(new CommandPlan([shell,..shellArgs],new(),"test",[]),_root,new Dictionary<string,string>(),CancellationToken.None);Eq(0,result.ExitCode);True(output.Contains("process-ok"));});

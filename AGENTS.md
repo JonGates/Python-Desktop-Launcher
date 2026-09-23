@@ -35,3 +35,6 @@ Do not fabricate SDK availability, compiler results, test counts, signed executa
 
 Keep source files focused. Use the theme dictionary keys in both themes. Don't bundle fonts.
 The Core project cannot reference WPF; the Windows project cannot depend on Desktop.
+
+Delivery: after each requested upgrade, run verification and create a Git commit containing
+the relevant changes. Report the commit hash; do not imply a push occurred unless verified.

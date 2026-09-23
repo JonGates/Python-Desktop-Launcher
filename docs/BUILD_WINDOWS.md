@@ -4,7 +4,7 @@
 
 基线为 .NET 10 SDK；源代码包含 WPF、P/Invoke ConPTY 和 Windows Job Object。推荐 Windows 11 x64 首轮验证。发布可以选择 win-x64 或 win-arm64；arm64 没有在本次环境验证，不代表切换 RID 后所有终端交互已自动通过。
 
-本次已在 Windows x64 / .NET SDK 10.0.204 上完成 Release 编译、Core 与 Windows 原生规格测试，以及 8 张 WPF 深浅主题渲染检查。自包含单文件发布在下载 .NET runtime pack 时停滞并已停止，尚未生成可交付 EXE / ZIP；人工 DPI、IME 和完整工作流也尚未验收。已执行项目、结果和未覆盖项见 [测试记录](TESTING.md)。
+本次已在 Windows x64 / .NET SDK 10.0.204 上完成 Release 编译、Core 与 Windows 原生规格测试、18 张 WPF 深浅主题渲染检查，以及自包含单文件 EXE / ZIP 发布。`tools/Test-Portable.ps1` 验证复制单个 EXE 后的首次绑定、没有环境、取消、已有配置重开和正常退出。人工 DPI、IME 和完整业务工作流尚未验收，详见 [测试记录](TESTING.md)。
 
 ## 一键构建
 
@@ -31,9 +31,10 @@ dotnet run --project src/ProjectLauncher.Desktop -- --project .
 dotnet run --project tests/ProjectLauncher.Specs -c Release
 dotnet run --project tests/ProjectLauncher.Windows.Specs -c Release
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Windows.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1
 ```
 
-后一个脚本把文本日志和 WPF 渲染图片写到 `artifacts/test-reports`。UI 检查会使用单独的 `artifacts/ui-smoke-project`，不执行 Demo 业务，不创建 Python 环境。生成的终端截图明确使用合成渲染检查文本；不是 ConPTY 测试的替代。
+`Test-Windows.ps1` 把文本日志和 WPF 渲染图片写到 `artifacts/test-reports`。UI 检查使用独立的测试项目，不执行 Demo 业务；首次配置截图使用明确的测试环境文件。终端截图使用合成渲染检查文本，不是 ConPTY 测试的替代。`Test-Portable.ps1` 要求先成功发布，并需要本机 Python；它在 `artifacts/portable-test-*` 中创建隔离的真实测试虚拟环境，通过 Windows UI Automation 操作复制后的 EXE。它会打开测试窗口，结束后正常关闭。
 
 项目同时提供 GitHub Actions 工作流；推送到 `main` / `master` 会触发，也可手动运行。工作流不使用部署凭证，只构建并上传 workflow artifacts。远程工作流结果须在 GitHub 上单独核对，不能由本地测试推断。
 
@@ -59,7 +60,7 @@ NuGet 直接依赖固定到 YamlDotNet 18.1.0。已成功还原并将六个项�
 - [.NET 10 WPF](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/whats-new/net100)
 - [EnableWindowsTargeting 说明](https://learn.microsoft.com/en-us/dotnet/core/tools/sdk-errors/netsdk1100)
 
-官方文档中的机制与本包实际已完成的测试是两件事。本源码已在 Windows 编译并通过上述自动测试，但微软支持单文件机制不等于本包已成功发布或完成人工验收。
+官方文档中的机制与本包实际已完成的测试是两件事。本包已成功发布并通过上述自动测试，仍需要完成人工验收。
 
 ## 重复构建不会打包用户运行数据
 

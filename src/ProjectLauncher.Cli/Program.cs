@@ -85,7 +85,7 @@ Run actions are noninteractive. Use shell for interactive programs. Exit codes: 
                     }
                     Console.WriteLine("初始化计划执行结束；可用 env --trust 检查实际解释器。"); return 0;
                 case "run":
-                    actionId ??= snapshot.Config.Actions[0].Id;
+                    actionId ??= snapshot.Config.Actions.FirstOrDefault()?.Id ?? throw new ConfigException("尚未添加启动动作，请先在项目设置中添加。");
                     return await RunAsync(CommandBuilder.Build(snapshot.Config, actionId, values, runtime.Root, runtime.RequirePython()), runtime.Root, runtime.ExecutionEnvironment(), cancellation.Token);
                 case "shell":
                     if (shellChoice is not ("auto" or "powershell" or "pwsh" or "cmd" or "python")) throw new ConfigException("不支持这个 Shell 选项。");

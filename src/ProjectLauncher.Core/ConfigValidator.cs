@@ -31,7 +31,7 @@ public static class ConfigValidator
             CheckEnvName(key); CheckNul(value, "环境变量 " + key);
             if (!environmentKeys.Add(key)) throw new ConfigException("环境变量名不区分大小写，存在重复：" + key);
         }
-        if (c.Actions.Count is < 1 or > 100) throw new ConfigException("至少定义一个启动动作，最多 100 个。");
+        if (c.Actions.Count > 100) throw new ConfigException("最多定义 100 个启动动作。");
         if (c.Parameters.Count > 200) throw new ConfigException("最多定义 200 个参数。");
         var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (var p in c.Parameters)

@@ -15,26 +15,39 @@ public partial class RunView : UserControl, IDisposable
     private readonly ShellViewModel _shell;
     private Dictionary<string, object?> _values = new();
     private bool _loading;
+    private ActionDefinition? _action;
+    public string SelectedActionId => _action?.Id ?? "";
     public RunView(ShellViewModel shell)
     {
         _loading = true; InitializeComponent(); _shell = shell; DataContext = shell;
         _values = CommandBuilder.EffectiveValues(shell.Config, shell.State.Values);
-        ActionBox.ItemsSource = shell.Config.Actions;
-        ActionBox.SelectedItem = shell.Config.Actions.FirstOrDefault(a => a.Id == shell.State.LastAction) ?? shell.Config.Actions[0];
+        _action = shell.Config.Actions.FirstOrDefault(a => a.Id == shell.State.LastAction) ?? shell.Config.Actions.FirstOrDefault();
         AdvancedCheck.IsChecked = shell.State.ShowAdvanced;
         Form.ValuesChanged += RefreshPreview;
+        SizeChanged += (_, _) => ParameterCard.MaxHeight = Math.Max(140, ActualHeight * 0.48);
         _shell.PropertyChanged += Shell_PropertyChanged;
         RefreshPresets(); _loading = false; ConfigureForm();
     }
     private void ConfigureForm()
     {
-        if (ActionBox.SelectedItem is not ActionDefinition action) return;
+        var action = _action;
+        EmptyPanel.Visibility = action is null ? Visibility.Visible : Visibility.Collapsed;
+        ExecutionBar.Visibility = action is null ? Visibility.Collapsed : Visibility.Visible;
+        var hasParameters = action is not null && CommandBuilder.SelectedParameters(_shell.Config, action).Any();
+        ParameterCard.Visibility = hasParameters ? Visibility.Visible : Visibility.Collapsed;
+        ParameterRow.Height = GridLength.Auto;
+        if (action is null) { ActionTitle.Text = "运行项目"; ActionSubtitle.Text = "先添加一个启动动作"; return; }
+        ActionTitle.Text = action.ToString();
+        ActionSubtitle.Text = _shell.ProjectName + "  /  " + action.Id;
         Form.Configure(_shell.Config, action, _values, _shell.Runtime.Root); Form.ShowAdvanced = AdvancedCheck.IsChecked == true; RefreshPreview();
     }
     public Dictionary<string, object?> CaptureValues() => Form.GetValues();
-    private void Action_Changed(object sender, SelectionChangedEventArgs e)
+    public void SelectAction(string id)
     {
-        if (_loading) return; _values = Form.GetValues(); ConfigureForm();
+        if (_loading || _shell.Busy || _action?.Id == id) return;
+        var action = _shell.Config.Actions.FirstOrDefault(a => a.Id == id);
+        if (action is null) return;
+        _values = Form.GetValues(); _action = action; _shell.State.LastAction = id; ConfigureForm();
     }
     private void Advanced_Changed(object sender, RoutedEventArgs e)
     {
@@ -43,7 +56,8 @@ public partial class RunView : UserControl, IDisposable
     }
     private void RefreshPreview()
     {
-        if (_loading || ActionBox.SelectedItem is not ActionDefinition action) return;
+        if (_loading || _action is null) return;
+        var action = _action;
         try
         {
             var command = CommandBuilder.Build(_shell.Config, action.Id, Form.GetValues(), _shell.Runtime.Root, _shell.Runtime.PythonPath);
@@ -54,7 +68,8 @@ public partial class RunView : UserControl, IDisposable
     }
     private async void Start_Click(object sender, RoutedEventArgs e)
     {
-        if (ActionBox.SelectedItem is ActionDefinition action) await _shell.RunActionAsync(Window.GetWindow(this), action.Id, Form.GetValues());
+        if (_action is null) return;
+        await _shell.RunActionAsync(Window.GetWindow(this), _action.Id, Form.GetValues());
     }
     private void Stop_Click(object sender, RoutedEventArgs e)
     {

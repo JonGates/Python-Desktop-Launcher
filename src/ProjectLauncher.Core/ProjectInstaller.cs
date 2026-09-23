@@ -7,12 +7,14 @@ public static class ProjectInstaller
         directory = Path.GetFullPath(directory);
         if (!Directory.Exists(directory)) throw new ConfigException("目标项目目录不存在。");
         entry ??= new[] { "main.py", "app.py", "run.py", "server.py" }.FirstOrDefault(f => File.Exists(Path.Combine(directory, f))) ?? "main.py";
-        var mode = File.Exists(Path.Combine(directory, "uv.lock")) ? "uv" :
-            File.Exists(Path.Combine(directory, ".venv", "pyvenv.cfg")) ? "existing" : "venv";
+        var environment = ProjectSetup.FindEnvironments(directory).FirstOrDefault();
+        var mode = environment is not null ? "existing" :
+            File.Exists(Path.Combine(directory, "uv.lock")) && File.Exists(Path.Combine(directory, "pyproject.toml")) ? "uv" : "venv";
         return new LauncherConfig
         {
             App = new() { Name = new DirectoryInfo(directory).Name, Description = "在项目自己的 Python 环境中运行。请在项目设置中核对真实入口和参数。" },
-            Runtime = new() { Mode = mode, Requirements = mode == "venv" && File.Exists(Path.Combine(directory, "requirements.txt")) ? "requirements.txt" : "" },
+            Runtime = new() { Mode = mode, Venv = environment is null ? ".venv" : Path.GetRelativePath(directory, environment),
+                Requirements = mode == "venv" && File.Exists(Path.Combine(directory, "requirements.txt")) ? "requirements.txt" : "" },
             Actions = [new() { Id = "run", Label = "运行项目", Argv = ["python", entry], Parameters = [] }], Parameters = []
         };
     }

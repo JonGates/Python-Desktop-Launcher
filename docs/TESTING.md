@@ -1,6 +1,6 @@
 # 验证记录与 Windows 验收
 
-版本：**2.0.0-preview.1**。记录日期：2026-09-23。以下区分已执行检查、未完成的发布步骤和人工验收，不把自动化通过等同于产品已验收。
+版本：**2.0.0-preview.1**。记录日期：2026-09-23。已完成 win-x64 单文件发布；以下区分自动测试与仍待完成的人工验收。
 
 ## 本次实际执行了什么
 
@@ -9,16 +9,31 @@
 | 检查 | 状态 | 证据与范围 |
 |---|---|---|
 | Release 解决方案编译 | 已执行，通过 | `dotnet build ProjectLauncher.sln -c Release`；0 个警告，0 个错误 |
-| C# Core 回归程序 | 已执行，通过 | `tests/ProjectLauncher.Specs`：62 passed，0 failed |
+| C# Core 回归程序 | 已执行，通过 | `tests/ProjectLauncher.Specs`：78 passed，0 failed；含 11 项首次接入与配置保护回归 |
 | Windows ConPTY / Job / 项目锁测试 | 已执行，通过 | 4 项通过；包含父进程标准流重定向时的 ConPTY 输入回归 |
-| WPF 深浅色截图与绑定错误检查 | 已执行，通过 | `tools/Test-Windows.ps1` 生成 8 张原生 WPF 图片；报告 8 项 PASS |
+| WPF 深浅色截图与绑定错误检查 | 已执行，通过 | 22 张原生 WPF 图片：原有四页面 8 张、首次接入三种环境状态 6 张、紧凑动作界面 2 张、动作编辑器 2 张、参数弹窗 2 张、侧栏运行状态 2 张；含创建配置、取消与配置中途出现的检查，共 24 项 PASS |
 | Python Demo 自动化测试 | 已执行，通过 | 13 tests，OK；只验证示例业务脚本 |
-| 静态源码检查 | 已执行，通过 | 542 passed，0 failed；不是 C# 编译器或 WPF 运行时 |
+| 静态源码检查 | 已执行，通过 | 617 passed，0 failed；不是 C# 编译器或 WPF 运行时 |
 | 源码文件 SHA-256 | 已更新 | 根目录 `MANIFEST.sha256`；仅代表所列源码文件完整性 |
-| 单文件自包含 Windows EXE | **未完成** | `Build.ps1 -VerifyWindows` 已通过其编译与测试阶段；下载 `Microsoft.NETCore.App.Runtime.win-x64 10.0.8` 时无进展，已停止，未生成可交付 ZIP / EXE |
+| 单文件自包含 Windows EXE | 已执行，通过 | `Test-Windows.ps1` 与 `Build.ps1` 成功生成 GUI / CLI EXE，以及 portable / demo ZIP；GUI EXE 65,101,737 字节 |
+| 复制单个 EXE 到项目 | 已执行，通过 | `tools/Test-Portable.ps1`：5 项 PASS；真实 UI Automation 操作已有环境、无环境、取消、已有配置重开，并实际探测绑定的 Python 3.12.10 环境；正常关闭通过 |
 | 人工 DPI / IME / 完整工作流 | **未执行** | 仍须按下方清单在交互式桌面逐项验收 |
 
 首次 Windows 编译发现并修正了 WPF 临时编译项目缺少 `System.IO` 全局引用；原生测试发现并修正了父进程标准流重定向时 CMD 绕过 ConPTY 输入管道的问题，并加入独立子进程回归；WPF smoke 发现并修正了只读 `Progress` 属性被默认 TwoWay 绑定导致的启动异常。静态 HTML 预览仍只描述设计方向，不是本次 WPF 运行证据。
+
+本轮复制 EXE 测试发现并修复了没有终端时关闭主窗口的重入异常。完整打包还修复了 Windows PowerShell 提前终止 NuGet 输出管道的问题，并补充实际 NuGet 包未附带的版本固定 YamlDotNet 许可证。
+
+动作编辑器回归实际操作原生控件，覆盖零动作打开、中文名称、参数自动绑定、弹窗取消隔离、参数列表即时更新、官网链接地址与文字、单参数卡片收缩、保存后准确导航、非法默认值阻止保存、零值保留、共享参数复制、条件值标量保留、错误输入下切换/添加不丢草稿，以及高级命令空 argv 保留。新增边界测试曾复现共享标量复制失效、切换时异常、增加参数丢失非法草稿和拒绝合法空 argv，修复后全部通过。
+
+侧栏快捷操作测试使用隔离项目中的真实 PowerShell 子进程，验证当前表单值传入、运行中按钮隔离、终端页停止/取消确认、自然退出后的状态恢复，以及停止圆圈的实际渲染颜色。测试环境中的 Python 文件仅为结构 fixture，不执行；真实 Python 绑定另由 portable 测试覆盖。
+
+`artifacts/portable/Launcher.exe` 的 SHA-256：
+
+```text
+C40294716781A089A3BBB10F2E6F370A3A029E58FA6D3D24F4660AB01675E763
+```
+
+单文件测试目录只有复制的 EXE 和项目自身文件，运行时确认 WPF 原生组件来自 EXE 的临时解包目录。尚未在未安装 .NET 的独立测试机上验收。下载过慢的两个运行时包通过镜像获取后，逐个比对 NuGet 官方响应中的 SHA-512，均一致；仓库 NuGet 源配置未改动。
 
 ## 可复核的本地检查
 
@@ -56,7 +71,11 @@ Core 测试代码覆盖 v1 配置、非法字段和循环引用、参数顺序�
 
 WPF 检查遍历四个页面与深/浅主题，使用 `RenderTargetBitmap` 导出 8 张实际 WPF 图片，并记录捕获到的绑定错误。测试终端标签使用**明确标注的测试屏幕内容**；它只是覆盖终端控件绘制，不代表这个截图过程启动了真实 Python。真实 ConPTY 测试由另一个原生测试程序执行。
 
-自动截图检查也有边界：它不覆盖所有鼠标/键盘交互、所有启动阶段绑定错误、IME、不同缩放和全部 TUI 兼容。不能仅凭八张图片宣告产品已经验收。
+此外，首次接入窗口在深/浅主题下分别测试 0 / 1 / 2 个环境，生成另 6 张图片；操作真实 WPF 按钮验证不要求入口、多个环境必须选择、生成配置、取消以及配置文件中途出现时保持原文。环境文件是结构测试 fixture，不执行其中的解释器。
+
+发布后运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-Portable.ps1`，可复核只复制一个 EXE 的接入流程。脚本会在 `artifacts/portable-test-*` 中创建隔离的真实虚拟环境，并使用 Windows UI Automation 操作测试窗口。本轮报告位于 `artifacts/portable-test-dc9dffcf1c3c4acaa449348ef79e2d2a/report.txt`。
+
+自动截图检查也有边界：它不覆盖所有鼠标/键盘交互、所有启动阶段绑定错误、IME、不同缩放和全部 TUI 兼容。不能仅凭自动截图宣告产品已经验收。
 
 ## 人工验收清单
 
@@ -105,4 +124,4 @@ WPF 检查遍历四个页面与深/浅主题，使用 `RenderTargetBitmap` 导�
 
 ## 已补录与仍待补录
 
-已补录 Windows 版本/架构、SDK、Release 编译、两个回归程序和 8 张 GUI 图片/报告。仍需在 runtime pack 可正常获取时重新执行自包含发布，记录发布 EXE / ZIP 的 SHA-256，并完成上述人工验收清单。完成这些证据前保留 preview 标识，不把本包宣传为生产级已验证发行版。
+已补录 Windows 版本/架构、SDK、Release 编译、两个回归程序、22 张 GUI 图片、首次接入测试、复制单 EXE 测试与 EXE 哈希；ZIP 哈希由发布脚本写入相邻的 `.sha256` 文件。仍需完成上述人工验收清单，保留 preview 标识。

@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using ProjectLauncher.Core;
 using ProjectLauncher.Windows;
 using ProjectLauncher.Desktop.Services;
+using ProjectLauncher.Desktop.Views;
 
 namespace ProjectLauncher.Desktop;
 
@@ -86,12 +87,7 @@ public partial class App : Application
             folder = choose.FolderName; path = Path.Combine(folder, "launcher.yaml");
             if (File.Exists(path)) return true;
         }
-        if (!Dialogs.Confirm(null, "为这个项目创建启动配置", folder + "\n\n没有找到 launcher.yaml。可创建一份最小配置，之后在独立的「项目设置」页面添加参数。\n\n仅新增配置文件，不修改 Python 源码或依赖文件，也不会自动执行代码。", "创建配置")) return false;
-        var discovered = ProjectInstaller.Discover(folder);
-        var entry = Dialogs.Input(null, "确认项目入口", "自动发现只是文件名候选，请核对真实入口。模块入口可稍后在设置中改为 python / -m / 包名。", discovered.Actions[0].Argv[1]);
-        if (entry is null) return false;
-        discovered.Actions[0].Argv = ["python", entry];
-        ConfigStore.Save(path, discovered, null); return true;
+        return new ProjectSetupWindow(path).ShowDialog() == true;
     }
     public MainWindow OpenProject(ConfigSnapshot snapshot)
     {

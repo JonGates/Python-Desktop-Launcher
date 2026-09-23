@@ -27,6 +27,8 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
     private bool _busy;
     public bool Busy { get => _busy; private set { if (Set(ref _busy, value)) { Raise(nameof(CanRun)); Raise(nameof(CanEdit)); } } }
     public bool CanRun => !Busy;
+    private string _activeActionId = "";
+    public string ActiveActionId { get => _activeActionId; private set => Set(ref _activeActionId, value); }
     public bool CanEdit => !Busy && OpenTerminalCount == 0;
     private int _openTerminalCount;
     public int OpenTerminalCount { get => _openTerminalCount; set { if (Set(ref _openTerminalCount, value)) Raise(nameof(CanEdit)); } }
@@ -98,9 +100,11 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
             var action = Config.Actions.First(a => a.Id == actionId);
             var command = CommandBuilder.Build(Config, actionId, values, Runtime.Root, Runtime.RequirePython());
             State.Values = new(values); State.LastAction = actionId; SaveState();
+            ActiveActionId = action.Id;
             await ExecuteAsync([command], action.Id, action.Label, Runtime.ExecutionEnvironment());
         }
         catch (Exception e) { Notify(e.Message); }
+        finally { ActiveActionId = ""; }
     }
     public async Task InitializeAsync(Window owner)
     {

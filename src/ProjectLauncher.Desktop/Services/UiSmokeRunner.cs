@@ -22,6 +22,8 @@ internal static class UiSmokeRunner
         var results = new List<string>();
         try
         {
+            await ActionNavigationSmoke.RunAsync(window, directory, results);
+            await ActionQuickControlSmoke.RunAsync(directory, results);
             window.Width = 1360; window.Height = 920;
             foreach (string theme in new[] { "dark", "light" })
             {
@@ -42,6 +44,7 @@ internal static class UiSmokeRunner
                     results.Add("PASS native WPF layout/render: " + name);
                 }
             }
+            ProjectSetupSmoke.Run(directory, results);
             listener.Flush();
             if (log.Length > 0) throw new InvalidOperationException("WPF binding errors:\n" + log);
             results.Add("NOT COVERED: interactive ConPTY, IME, real drag-drop, high DPI, foreground focus and UI automation workflows.");

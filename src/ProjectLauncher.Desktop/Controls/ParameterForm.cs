@@ -8,7 +8,7 @@ namespace ProjectLauncher.Desktop.Controls;
 
 public sealed class ParameterForm : UserControl
 {
-    private readonly StackPanel _root = new();
+    private readonly Grid _root = new();
     private readonly Dictionary<string, Field> _fields = new();
     private LauncherConfig? _config;
     private Dictionary<string, object?> _allValues = new();
@@ -18,20 +18,37 @@ public sealed class ParameterForm : UserControl
     public bool ShowAdvanced { get => _showAdvanced; set { _showAdvanced = value; UpdateVisibility(); } }
     public event Action? ValuesChanged;
     private sealed record Field(ParameterDefinition Definition, FrameworkElement Container, Func<object?> Read, Action<object?> Write);
-    public ParameterForm() => Content = _root;
+    public ParameterForm() { Content = _root; SizeChanged += (_, _) => LayoutFields(); }
+    private void LayoutFields()
+    {
+        _root.RowDefinitions.Clear(); _root.ColumnDefinitions.Clear();
+        int columns = ActualWidth >= 600 ? 2 : 1;
+        for (int i = 0; i < columns; i++) _root.ColumnDefinitions.Add(new());
+        int row = 0, column = 0;
+        foreach (var field in _fields.Values.Where(f => f.Container.Visibility == Visibility.Visible))
+        {
+            bool wide = columns == 1 || field.Definition.Type is "file" or "directory" or "textarea";
+            if (wide && column != 0) { row++; column = 0; }
+            while (_root.RowDefinitions.Count <= row) _root.RowDefinitions.Add(new() { Height = GridLength.Auto });
+            Grid.SetRow(field.Container, row); Grid.SetColumn(field.Container, column);
+            Grid.SetColumnSpan(field.Container, wide ? columns : 1);
+            field.Container.Margin = new(0, 0, !wide && column == 0 ? 16 : 0, 10);
+            if (wide || ++column == columns) { row++; column = 0; }
+        }
+    }
 
     public void Configure(LauncherConfig config, ActionDefinition action, Dictionary<string, object?> values, string projectRoot)
     {
         _updating = true; _config = config; _allValues = CommandBuilder.EffectiveValues(config, values); _projectRoot = projectRoot;
         _fields.Clear(); _root.Children.Clear();
         foreach (var parameter in CommandBuilder.SelectedParameters(config, action)) CreateField(parameter);
-        if (_fields.Count == 0) _root.Children.Add(new TextBlock { Text = "这个动作不需要额外参数。\n点击右侧「开始运行」即可执行；需要交互输入的脚本请使用项目终端。", Style = (Style)FindResource("Hint"), Margin = new Thickness(2, 18, 2, 22) });
+        if (_fields.Count == 0) _root.Children.Add(new TextBlock { Text = "此动作无需额外参数，可直接启动。\n需要调整入口或添加参数时，点击「配置动作」。", Style = (Style)FindResource("Hint"), Margin = new Thickness(2, 10, 2, 14) });
         _updating = false; UpdateVisibility();
     }
     private void CreateField(ParameterDefinition p)
     {
-        var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 20) };
-        var heading = new DockPanel { Margin = new Thickness(0, 0, 0, 7) };
+        var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 14) };
+        var heading = new DockPanel { Margin = new Thickness(0, 0, 0, 5) };
         var type = new TextBlock { Text = p.Binding == "env" ? "ENV" : p.Advanced ? "ADVANCED" : p.Type.ToUpperInvariant(), Style = (Style)FindResource("Micro"), VerticalAlignment = VerticalAlignment.Center };
         DockPanel.SetDock(type, Dock.Right); heading.Children.Add(type);
         heading.Children.Add(new TextBlock { Text = p.DisplayName + (p.Required ? " *" : ""), FontWeight = FontWeights.SemiBold, FontSize = 13 });
@@ -111,6 +128,7 @@ public sealed class ParameterForm : UserControl
         if (_config is null) return;
         var values = CommandBuilder.EffectiveValues(_config, _allValues);
         foreach (var field in _fields.Values) field.Container.Visibility = (ShowAdvanced || !field.Definition.Advanced) && CommandBuilder.IsVisible(field.Definition, values) ? Visibility.Visible : Visibility.Collapsed;
+        LayoutFields();
     }
     public Dictionary<string, object?> GetValues()
     {

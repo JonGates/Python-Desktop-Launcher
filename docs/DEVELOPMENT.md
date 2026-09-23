@@ -2,7 +2,7 @@
 
 ## 先跑通构建，再扩功能
 
-安装 .NET 10 SDK，在 Windows 上打开 `ProjectLauncher.sln` 或运行 `Start-Dev.cmd`。本次已完成 Windows Release 编译和自动化测试，结果见 [测试记录](TESTING.md)；修改后仍应重新执行 Build / Test-Windows。单文件发布与人工验收尚未完成，不能把源码预览版标记为稳定发行版。
+安装 .NET 10 SDK，在 Windows 上打开 `ProjectLauncher.sln` 或运行 `Start-Dev.cmd`。本次已完成 Windows Release 编译、自动化测试和 win-x64 单文件发布，结果见 [测试记录](TESTING.md)；修改后仍应重新执行 Build / Test-Windows。人工验收尚未完成，保留 preview 标识。
 
 ```powershell
 dotnet restore ProjectLauncher.sln
@@ -26,6 +26,7 @@ src/
     ProcessRunner.cs           非交互任务、流式日志、超时、脱敏
     StateStore.cs              本地状态、预设、历史、有限磁盘日志
     ProjectInstaller.cs        不覆盖现有项目的安装计划
+    ProjectSetup.cs            首次接入的环境发现、绑定和只创建配置
     TerminalScreen.cs          有界基础 VT 屏幕模型
   ProjectLauncher.Windows/
     NativeMethods.cs           Windows 原生签名与布局
@@ -39,6 +40,8 @@ src/
     ViewModels/                INPC 共享状态、运行/日志/环境流程
     Views/                     Run / Terminal / Environment / Settings
     Controls/ParameterForm.cs  参数控件生成
+    Controls/ActionWorkspace.cs 动作编辑、参数列表与成员保护
+    Controls/ParameterEditorWindow.cs 独立参数弹窗、取消隔离和保存校验
     Controls/TerminalControl.cs 原生 VT 绘制与输入
     Services/                  主题、对话框、Windows UI smoke test
   ProjectLauncher.Cli/         命令行入口，复用核心和 Windows 服务

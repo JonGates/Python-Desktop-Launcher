@@ -12,8 +12,11 @@ function Invoke-Dotnet([string[]]$Arguments) {
 }
 function Copy-LicenseNotices([string]$Destination) {
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-    $cacheLine = (& dotnet nuget locals global-packages --list | Select-Object -First 1)
+    # Capture to completion: Select-Object -First can stop the native pipeline early in Windows PowerShell.
+    $cacheOutput = @(& dotnet nuget locals global-packages --list)
     if ($LASTEXITCODE -ne 0) { throw 'Cannot locate restored NuGet packages for license collection.' }
+    $cacheLine = $cacheOutput | Where-Object { $_ -match '^global-packages:' } | Select-Object -First 1
+    if (-not $cacheLine) { throw 'NuGet did not report its global package directory.' }
     $cache = ($cacheLine -replace '^global-packages:\s*','').Trim()
     if (-not (Test-Path -LiteralPath $cache -PathType Container)) { throw "NuGet cache does not exist: $cache" }
     $found = @()
@@ -32,7 +35,13 @@ function Copy-LicenseNotices([string]$Destination) {
         }
     }
     if (-not ($found | Where-Object { $_ -like 'yamldotnet-*' })) {
-        throw 'YamlDotNet license text was not found in the restored package. Supply its verified license before redistribution.'
+        # YamlDotNet 18.1.0 declares MIT in its nuspec but does not bundle the license text.
+        # This copy is pinned to the repository commit recorded in that exact package.
+        $license = Join-Path $root 'licenses/YamlDotNet-18.1.0-LICENSE.txt'
+        if (-not (Test-Path -LiteralPath $license -PathType Leaf)) { throw 'Verified YamlDotNet license is missing.' }
+        $name = 'yamldotnet-18.1.0-LICENSE.txt'
+        Copy-Item -LiteralPath $license -Destination (Join-Path $Destination $name)
+        $found += $name
     }
     $found | Sort-Object -Unique | Set-Content -LiteralPath (Join-Path $Destination 'COLLECTED-NOTICES.txt') -Encoding UTF8
     Write-Host 'Copied available restored-package notices; this is an inventory, not a legal completeness guarantee.'

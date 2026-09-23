@@ -6,9 +6,16 @@
 
 第一次先在源码目录运行 `Build.cmd`。成功后从 `artifacts/portable` 取 `Launcher.exe`。日常不修改启动器源码时，所有业务项目可复用这同一份 EXE，不需要每个项目重新编译。
 
-把它复制到目标项目根目录，双击。没有 `launcher.yaml` 时会询问创建；已有合法 schema v1 配置时使用现有配置。不会自动修改 pyproject.toml、requirements.txt、Python 源码或虚拟环境。
+把它复制到目标项目根目录，双击。已有合法 schema v1 的 `launcher.yaml`（Windows 下也支持 `Launcher.yaml`）时直接加载并保留原内容。没有配置时显示首次接入窗口：
 
-也可在发布版窗口左下点击「接入其他项目」：选择项目目录 → 确认入口 → 确认复制。已有 Launcher.exe 时拒绝覆盖；升级前自行备份并重命名旧 EXE。文件复制使用临时文件再移动，避免把未完成的 EXE 当成可用文件。
+1. 项目目录默认绑定 EXE 所在目录，不使用启动时的工作目录。
+2. 检测项目根目录下一层的虚拟环境；一个候选时预选，多个候选时要求选择。可通过「选择目录」绑定项目外的环境。
+3. 点击「绑定并进入」，保存 `launcher.yaml` 并进入主窗口。不要求入口文件，不生成默认动作。
+4. 到「项目设置 → 启动动作」添加执行目标与参数；参数通过弹窗新增、编辑，保存后显示在当前动作的列表。点击「保存并查看」应用配置。没有环境时先到环境管理创建。
+
+检测依据是 `pyvenv.cfg` 和 `Scripts/python.exe`，适用于 venv / virtualenv / uv 虚拟环境，不包含 Conda 环境。项目内部环境保存相对路径，外部环境保存绝对路径。只检查结构，不运行解释器；需要时再到环境管理检查实际解释器。取消不会写入配置；不会自动修改 pyproject.toml、requirements.txt、Python 源码或虚拟环境。空动作配置使用 actions: []，旧版 EXE 可能拒绝读取，请使用新版启动器。
+
+每个项目独立放置 Launcher.exe，界面不再提供跨项目接入或切换入口。升级前请关闭启动器并备份旧 EXE，再复制新版本；保留项目已有的 Launcher.yaml。多个启动动作统一显示在左侧「运行项目」的可折叠菜单中。
 
 接入脚本同样需要预先构建的 EXE：
 
@@ -17,7 +24,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Install-Into.ps1 -Ta
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Install-Into.ps1 -Target "D:\code\existing-project" -Entry "app.py"
 ```
 
-`-WhatIf` 只显示计划。脚本保留已有 YAML 的原始字节，在应用内加载时再做完整校验。GUI 内的接入功能则会在复制前尝试加载已有配置。
+`-WhatIf` 只显示计划。脚本保留已有 YAML 的原始字节，在应用内加载时再做完整校验。
 
 ## 二、按已有环境选择模式
 
@@ -81,7 +88,7 @@ uv 项目中常见的 `uv run python main.py` 通常可配置为 `mode: uv` 加 
 
 ## 五、旧 Python 壳升级
 
-建议在项目副本先试：保留现有 `launcher.yaml` 和业务 `.venv`，新增发布后的 `Launcher.exe`。此次源码实现了 v1 已有九种类型、参数绑定和条件显示，包内也保留了上一版的真实配置作为 C# 回归 fixture；**C# 自动测试已通过，但没有覆盖所有旧项目，不能把“保留 fixture”描述成全面兼容。**单文件 EXE 尚未完成发布，须待成功发布后再按本节操作。
+建议在项目副本先试：保留现有 `launcher.yaml` 和业务 `.venv`，新增 `artifacts/portable/Launcher.exe`。此次源码实现了 v1 已有九种类型、参数绑定和条件显示，包内也保留了上一版的真实配置作为 C# 回归 fixture；**C# 自动测试已通过，但没有覆盖所有旧项目，不能把“保留 fixture”描述成全面兼容。**
 
 第一次成功运行 C# 版后，旧 `Start.bat`、`launcher.pyw`、`.launcher/runtime` 可按需手动归档；启动器不会自动删它们。新数据写在 `.launcher/csharp`，不迁移旧版预设和日志。首次用 C# 设置页保存前会备份原 YAML 为 `.bak`，但一次备份不等于版本管理。
 

@@ -8,9 +8,9 @@ Direct package reference: **YamlDotNet 18.1.0**. License: MIT.
 Copyright (c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Antoine Aubry and contributors.
 
 Official project: https://github.com/aaubry/YamlDotNet
-Official license: https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt
+Version-pinned license: https://github.com/aaubry/YamlDotNet/blob/748334a8fa7c227740018b284b71ad95cc6b7fc7/LICENSE.txt
 
-The build helper collects license / notice files available in the restored package cache into each distribution's `licenses` directory. Verify that the YamlDotNet license is actually present; package layouts may change.
+YamlDotNet 18.1.0 declares MIT in its package metadata but omits the license text. The source includes `licenses/YamlDotNet-18.1.0-LICENSE.txt`, verified against the repository commit recorded in that package. The build helper uses this pinned copy when collecting distribution notices.
 
 ## .NET / WPF
 
