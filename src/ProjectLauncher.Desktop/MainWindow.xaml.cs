@@ -17,7 +17,7 @@ public partial class MainWindow : Window
     {
         e.Handled = true;
         try { Process.Start(new ProcessStartInfo("https://github.com/JonGates/Python-Desktop-Launcher") { UseShellExecute = true }); }
-        catch (Exception ex) { Shell.Notify(L.Text("Text.014") + ex.Message); }
+        catch (Exception ex) { Shell.NotifyLocalized(() => L.Text("Text.014") + ex.Message); }
     }
     private RunView _run = null!;
     private TerminalView _terminal = null!;
@@ -118,7 +118,7 @@ public partial class MainWindow : Window
     private void Maximize_Click(object sender, RoutedEventArgs e) { if (WindowState == WindowState.Maximized) SystemCommands.RestoreWindow(this); else SystemCommands.MaximizeWindow(this); }
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
-    { try { Process.Start(new ProcessStartInfo(Shell.ProjectRoot) { UseShellExecute = true }); } catch (Exception ex) { Shell.Notify(ex.Message); } }
+    { try { Process.Start(new ProcessStartInfo(Shell.ProjectRoot) { UseShellExecute = true }); } catch (Exception ex) { Shell.Notify(ex); } }
     private void DismissNotice_Click(object sender, RoutedEventArgs e) => Shell.DismissNotification();
     private void NoticeDetail_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, L.Text("Text.018"), Shell.NotificationDetail);
     private void About_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, "Project Launcher 2.0 · C# Preview",

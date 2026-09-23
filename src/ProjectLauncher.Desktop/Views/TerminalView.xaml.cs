@@ -47,7 +47,7 @@ public partial class TerminalView : UserControl, IAsyncDisposable
     private async Task NewSessionAsync(string choice)
     {
         if (_shell.Busy || _disposed) return;
-        if (Tabs.Count >= 4) { _shell.Notify(L.Text("Text.197")); return; }
+        if (Tabs.Count >= 4) { _shell.NotifyLocalized(() => L.Text("Text.197")); return; }
         try
         {
             if (!_shell.ConfirmTrust(Window.GetWindow(this))) return;
@@ -74,7 +74,7 @@ public partial class TerminalView : UserControl, IAsyncDisposable
             }
             catch { tab.Starting = false; await tab.Session.CloseAsync(); Tabs.Remove(tab); UpdateCount(); throw; }
         }
-        catch (Exception e) { _shell.Notify(L.Text("Text.201") + e.Message); }
+        catch (Exception e) { _shell.NotifyLocalized(() => L.Text("Text.201") + e.Message); }
     }
     private void Drain()
     {
@@ -85,7 +85,7 @@ public partial class TerminalView : UserControl, IAsyncDisposable
             if (tab.Overflow)
             {
                 tab.Control.ResetScreen(); tab.Overflow = false;
-                _shell.Notify(L.Text("Text.202"));
+                _shell.NotifyLocalized(() => L.Text("Text.202"));
             }
             if (buffer.Length > 0) tab.Control.Feed(buffer.ToString());
         }
@@ -107,7 +107,7 @@ public partial class TerminalView : UserControl, IAsyncDisposable
     private async void CloseTab_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.Tag is not TerminalTab tab) return;
-        if (tab.Starting) { _shell.Notify(L.Text("Text.203")); return; }
+        if (tab.Starting) { _shell.NotifyLocalized(() => L.Text("Text.203")); return; }
         if (tab.Session.IsRunning && !Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.204"), L.Text("Text.205"), L.Text("Text.206"), true)) return;
         try { await tab.Session.CloseAsync().WaitAsync(TimeSpan.FromSeconds(15)); Tabs.Remove(tab); UpdateCount(); }
         catch (Exception ex) { _shell.Notify(ex); }
@@ -122,7 +122,7 @@ public partial class TerminalView : UserControl, IAsyncDisposable
     {
         try
         {
-            if (Selected?.Session.IsRunning != true) { _shell.Notify(L.Text("Text.207")); return; }
+            if (Selected?.Session.IsRunning != true) { _shell.NotifyLocalized(() => L.Text("Text.207")); return; }
             Selected.Session.Write(InputLineBox.Text + "\r"); InputLineBox.Clear();
         }
         catch (Exception e) { _shell.Notify(e); }
@@ -143,13 +143,13 @@ public partial class TerminalView : UserControl, IAsyncDisposable
                 process = Process.Start(start) ?? throw new ConfigException(new ProjectLauncher.Core.Localization.LocalizedDiagnostic("Text.208", [])); job.Attach(process); _external.Add((process, job));
             }
             catch { if (process is not null) { try { process.Kill(true); } catch { } process.Dispose(); } job.Dispose(); throw; }
-            UpdateCount(); _shell.Notify(L.Text("Text.209"));
+            UpdateCount(); _shell.NotifyLocalized(() => L.Text("Text.209"));
         }
         catch (Exception ex) { _shell.Notify(ex); }
     }
     private async void CloseAll_Click(object sender, RoutedEventArgs e)
     {
-        if (Tabs.Any(t => t.Starting)) { _shell.Notify(L.Text("Text.210")); return; }
+        if (Tabs.Any(t => t.Starting)) { _shell.NotifyLocalized(() => L.Text("Text.210")); return; }
         if (!Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.211"), L.Text("Text.212"), L.Text("Ui.103"), true)) return;
         try { await CloseAllAsync(); } catch (Exception ex) { _shell.Notify(ex); }
     }

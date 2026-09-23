@@ -84,12 +84,12 @@ public partial class RunView : UserControl, IDisposable
         {
             string path = Path.GetFullPath(string.IsNullOrWhiteSpace(_shell.Config.App.OutputDir) ? "." : _shell.Config.App.OutputDir, _shell.Runtime.Root);
             // A dynamic output parameter does not implicitly replace app.output_dir.
-            if (!Directory.Exists(path)) { _shell.Notify(L.Text("Text.170") + path); return; }
+            if (!Directory.Exists(path)) { _shell.NotifyLocalized(() => L.Text("Text.170") + path); return; }
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
         catch (Exception ex) { _shell.Notify(ex); }
     }
-    private void CopyCommand_Click(object sender, RoutedEventArgs e) { try { Clipboard.SetText(PreviewBox.Text); _shell.Notify(L.Text("Text.171")); } catch (Exception ex) { _shell.Notify(ex); } }
+    private void CopyCommand_Click(object sender, RoutedEventArgs e) { try { Clipboard.SetText(PreviewBox.Text); _shell.NotifyLocalized(() => L.Text("Text.171")); } catch (Exception ex) { _shell.Notify(ex); } }
     private void ClearLog_Click(object sender, RoutedEventArgs e) => _shell.ClearLog();
     private void ExportLog_Click(object sender, RoutedEventArgs e)
     {
@@ -112,9 +112,9 @@ public partial class RunView : UserControl, IDisposable
     {
         var name = Dialogs.Input(Window.GetWindow(this), L.Text("Ui.056"), L.Text("Text.176"), L.Text("Text.177"));
         if (name is null) return;
-        if (name.Length > 64 || name.Any(char.IsControl) || name == L.Text("Text.173") || name == L.Text("Text.174")) { _shell.Notify(L.Text("Text.178")); return; }
+        if (name.Length > 64 || name.Any(char.IsControl) || name == L.Text("Text.173") || name == L.Text("Text.174")) { _shell.NotifyLocalized(() => L.Text("Text.178")); return; }
         if (_shell.State.Presets.ContainsKey(name) && !Dialogs.Confirm(Window.GetWindow(this), L.Text("Text.179"), name, L.Text("Text.180"))) return;
-        _shell.State.Presets[name] = Form.GetValues(); _shell.SaveState(); _loading = true; RefreshPresets(); PresetBox.SelectedItem = name; _loading = false; _shell.Notify(L.Text("Text.181"));
+        _shell.State.Presets[name] = Form.GetValues(); _shell.SaveState(); _loading = true; RefreshPresets(); PresetBox.SelectedItem = name; _loading = false; _shell.NotifyLocalized(() => L.Text("Text.181"));
     }
     private void DeletePreset_Click(object sender, RoutedEventArgs e)
     {
@@ -129,7 +129,7 @@ public partial class RunView : UserControl, IDisposable
     private void Shell_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ShellViewModel.LogText) && AutoScrollCheck.IsChecked == true) Dispatcher.InvokeAsync(() => LogBox.ScrollToEnd());
-        if (e.PropertyName == nameof(ShellViewModel.EnvironmentBadge)) RefreshPreview();
+        if (e.PropertyName == nameof(ShellViewModel.EnvironmentAvailable)) RefreshPreview();
     }
     public void Dispose() => _shell.PropertyChanged -= Shell_PropertyChanged;
 }

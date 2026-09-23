@@ -22,7 +22,8 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
     public string ProjectVersion => "v" + Config.App.Version;
     public string ProjectRoot => Runtime.Root;
     public string RuntimeLabel => Config.Runtime.Mode.ToUpperInvariant() + "  /  " + Config.Runtime.Venv;
-    public string EnvironmentBadge => Runtime.Exists ? L.Text("Text.112") : L.Text("Text.113");
+    public bool EnvironmentAvailable => Runtime.Exists;
+    public string EnvironmentBadge => EnvironmentAvailable ? L.Text("Text.112") : L.Text("Text.113");
     public string AppVersion => "2.0  /  C# PREVIEW";
     private bool _busy;
     public bool Busy { get => _busy; private set { if (Set(ref _busy, value)) { Raise(nameof(CanRun)); Raise(nameof(CanEdit)); } } }
@@ -146,7 +147,7 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
             var preview = string.Join("\n\n", plans.Select(p => p.Preview));
             if (!Dialogs.Confirm(owner, L.Text("Text.122"), preview + L.Text("Text.123"), L.Text("Text.124"))) return;
             await ExecuteAsync(plans, "environment", L.Text("Text.125"), Runtime.InitializationEnvironment());
-            Raise(nameof(EnvironmentBadge));
+            Raise(nameof(EnvironmentBadge)); Raise(nameof(EnvironmentAvailable));
             if (Runtime.Exists) NotifyLocalized(() => L.Text("Text.126"));
         }
         catch (Exception e) { Notify(e); }
@@ -162,7 +163,7 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
             _environmentVersionRender = null; EnvironmentVersion = "Python " + probe.Version;
             _environmentDetailRender = () => L.Text("Probe.Detail", probe.Executable, probe.Prefix, probe.BasePrefix, L.Text(probe.HasPip ? "Text.128" : "Text.129"));
             EnvironmentDetail = _environmentDetailRender();
-            SetStatus(() => L.Text("Text.130")); Raise(nameof(EnvironmentBadge)); NotifyLocalized(() => L.Text("Text.131"));
+            SetStatus(() => L.Text("Text.130")); Raise(nameof(EnvironmentBadge)); Raise(nameof(EnvironmentAvailable)); NotifyLocalized(() => L.Text("Text.131"));
         }
         catch (Exception e) { _environmentVersionRender = () => L.Text("Text.132"); _environmentDetailRender = () => e.Message; EnvironmentVersion = _environmentVersionRender(); EnvironmentDetail = _environmentDetailRender(); SetStatus(() => L.Text("Text.133")); Notify(e); }
         finally { Busy = false; _operation?.Dispose(); _operation = null; }
@@ -203,7 +204,7 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
             QueueLog(L.Text("Log.End", history.Status, history.DurationSeconds)); FlushLog();
             _logFile?.Dispose(); _logFile = null; _runner = null; _operation.Dispose(); _operation = null;
             IsIndeterminate = false; Busy = false;
-            State.History.Add(history); SaveState(); RefreshHistory(); Raise(nameof(EnvironmentBadge));
+            State.History.Add(history); SaveState(); RefreshHistory(); Raise(nameof(EnvironmentBadge)); Raise(nameof(EnvironmentAvailable));
         }
     }
     private void QueueLog(string text)
@@ -259,7 +260,7 @@ public sealed class ShellViewModel : ObservableObject, IDisposable
     }
     private void RaiseAllConfiguration()
     {
-        foreach (var name in new[] { nameof(Config), nameof(ProjectName), nameof(ProjectDescription), nameof(ProjectVersion), nameof(ProjectRoot), nameof(RuntimeLabel), nameof(EnvironmentBadge) }) Raise(name);
+        foreach (var name in new[] { nameof(Config), nameof(ProjectName), nameof(ProjectDescription), nameof(ProjectVersion), nameof(ProjectRoot), nameof(RuntimeLabel), nameof(EnvironmentBadge), nameof(EnvironmentAvailable) }) Raise(name);
     }
     private void RefreshHistory() { History.Clear(); foreach (var item in State.History.AsEnumerable().Reverse()) History.Add(item); }
     public void Dispose() { _timer.Stop(); _operation?.Cancel(); _runner?.Stop(); _logFile?.Dispose(); }

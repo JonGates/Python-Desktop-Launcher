@@ -32,7 +32,7 @@ public partial class EnvironmentView : UserControl
         try
         {
             Clipboard.SetText(L.Text("Environment.Diagnostics", Environment.OSVersion, System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture, _shell.Snapshot.Path, _shell.Runtime.Root, _shell.Config.Runtime.Mode, _shell.Runtime.PythonPath, _shell.Runtime.UvPath ?? L.Text("Text.156"), _shell.EnvironmentDetail));
-            _shell.Notify(L.Text("Text.157"));
+            _shell.NotifyLocalized(() => L.Text("Text.157"));
         }
         catch (Exception ex) { _shell.Notify(ex); }
     }
