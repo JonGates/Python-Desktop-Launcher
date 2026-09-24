@@ -4,6 +4,15 @@
 
 ## 本次实际执行了什么
 
+### 2026-09-24：EXE / JAR 启动配置说明
+
+- 本轮仅修改文档、示例和配置生成 skill，未新增 Go / Java 运行模式。
+- `tools/Test-Windows.ps1` 退出码 0：Release 0 警告 / 0 错误，Core 84 passed / 0 failed，Windows 4 项通过，WPF 37 项 PASS。
+- `dotnet run --project src/ProjectLauncher.Cli -c Release --no-build -- check --project docs/examples/packaged-apps.yaml` 退出码 0：2 动作 / 2 参数，环境结构不存在（示例没有附带环境）。
+- 隔离验证程序 `artifacts/packaged-doc-check` 调用真实 `ConfigStore`、`CommandBuilder`、`ActionEditing` 和 `ProjectEnvironment`，6 项检查通过：EXE 含空格路径、JVM/JAR/端口参数顺序、表单覆盖默认值、端口越界拒绝、缺少 Python 环境拒绝、文档中的 UI 类型对应关系。未启动示例 EXE/JAR。
+- Demo 13 项通过；静态检查 719 passed / 0 failed；skill UTF-8 校验通过。独立 AI 只读复核了更新前后的指导缺口及其与实现的一致性。
+- 未执行 Java / Go 业务验收、人工 DPI / IME 工作流或重新打包发布。
+
 ### 2026-09-24：关于窗口与配置生成 skill
 
 - `tools/Test-Windows.ps1`：退出码 0；Release 构建 0 警告、0 错误；Core 84 passed / 0 failed，Windows 原生测试 4 项通过，WPF 报告 37 项 PASS。

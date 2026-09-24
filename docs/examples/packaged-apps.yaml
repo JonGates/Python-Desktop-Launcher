@@ -1,0 +1,39 @@
+schema_version: 1
+app:
+  name: Packaged applications example
+  description: Replace paths and options with those of your actual applications.
+runtime:
+  mode: existing
+  project_dir: .
+  venv: .venv
+  python: ''
+  requirements: ''
+  shell: auto
+  env: {}
+actions:
+  - id: report_exe
+    label: EXE report
+    argv: ['./bin/My Tool.exe']
+    parameters: [report_input]
+    timeout_seconds: 0
+  - id: jar_service
+    label: JAR service
+    argv: [java, -Xmx512m, '-Dapp.mode=prod', -jar, './dist/My App.jar']
+    parameters: [service_port]
+    timeout_seconds: 0
+parameters:
+  - name: report_input
+    label: Input file
+    type: file
+    binding: argument
+    argument: --input
+    required: true
+    must_exist: true
+  - name: service_port
+    label: Service port
+    type: integer
+    binding: argument
+    argument: --port
+    default: 8080
+    min: 1
+    max: 65535

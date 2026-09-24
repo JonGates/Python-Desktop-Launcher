@@ -87,6 +87,8 @@ Configuration trust and dependency changes require confirmation. Errors use dism
 
 ## Generate configuration with AI
 
+For packaged applications, use **Other program** with the EXE path, or **Advanced command** with one token per line: `java`, JVM options, `-jar`, and the JAR path. Add editable application inputs through the action's parameter form; they are appended after the fixed command. JVM options must stay before `-jar`. All actions currently still require a bound Python virtual environment. See the [step-by-step EXE/JAR guide (Chinese)](docs/LAUNCH_ACTIONS.md) and [complete YAML example](docs/examples/packaged-apps.yaml).
+
 The included [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md) reads your Python project's entry points, CLI definitions and environment to generate `launcher.yaml`. Its bundled schema reference works independently of this repository.
 
 Give your AI assistant the skill path and target project (replace these example paths):

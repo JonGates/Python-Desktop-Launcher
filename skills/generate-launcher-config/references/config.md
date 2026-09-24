@@ -17,6 +17,37 @@ Bare `python`, `python.exe`, `python3`, `pythonw` and matching exe forms map to 
 
 IDs/names match `^[A-Za-z_][A-Za-z0-9_-]*$` and are unique within their respective lists. `actions: []` is valid; null is not. Per-action `parameters` omitted/null selects all definitions; `[]` selects none; explicit names select in that exact order.
 
+## Packaged EXE and JAR actions
+
+Every action currently checks for a bound Python virtual environment before execution, including EXE and Java actions. Do not claim standalone Go/Java project support without that environment. `runtime.mode` remains existing/venv/uv. Java and any EXE dependencies must separately exist; generation does not install them.
+
+In Project settings → Launch actions, select **Other program** for a single EXE path such as `./bin/My Tool.exe`. Use **Advanced command** when fixed arguments are needed. That editor takes one argv element per line: no shell quoting around paths with spaces, no whole-command line, no accidental blank lines (they become empty arguments). YAML string quotes are syntax and do not become literal path quotes.
+
+EXE action example (insert under actions; define input at top level as file + argument --input):
+
+```yaml
+- id: packaged_exe
+  label: Packaged report
+  argv: ['./bin/My Tool.exe']
+  parameters: [input]
+```
+
+For a verified runnable `dist/My App.jar`, with documented application option `--port` accepting a separate value, the Advanced command editor is:
+
+```text
+java
+-Xmx512m
+-Dapp.mode=prod
+-jar
+./dist/My App.jar
+```
+
+Equivalent action: `argv: [java, -Xmx512m, '-Dapp.mode=prod', -jar, './dist/My App.jar']`, with `parameters: [port]`. Define port as integer, argument --port, default 8080, min 1, max 65535 if those constraints match the application. The final two tokens are `--port`, `8080`. JVM options must precede `-jar`; form parameters cannot be inserted before it. JARs without a valid entry point may need a documented classpath/main-class invocation instead; never guess one. Replace java with an explicit java.exe path when needed. JAVA_HOME alone is not executable lookup, and PATH cannot be overridden in runtime.env.
+
+All actions run in runtime.project_dir, not automatically beside the EXE/JAR. No per-action cwd exists. Relative program paths with directory separators resolve against the project root; use `./Tool.exe` for a local file rather than a bare PATH lookup. Fixed argv does not expand environment variables or parameter placeholders. Keep packaged DLLs/resources according to the program's requirements.
+
+Argument binding emits separate option/value tokens; it does not construct `--port=8080`. For an application requiring that single-token form, put a fixed value in argv or expose the whole token as positional text, explaining that numeric port validation is then unavailable. Only configure env secrets when the target actually reads that variable. GUI actions cannot accept console stdin. Configuration check does not verify EXE/JAR existence, Java compatibility or business readiness.
+
 ## Parameter definitions
 
 Supported fields: `name`, `label`, `description`, `type`, `default`, `required`, `advanced`, `binding`, `argument`, `env_name`, `min`, `max`, `options`, `must_exist`, `secret`, `boolean_mode`, `false_argument`, `visible_when`.

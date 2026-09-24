@@ -6,6 +6,8 @@
 
 ## 基本结构
 
+首次配置启动动作时，先阅读[启动动作与参数配置：Python、EXE 和 JAR](LAUNCH_ACTIONS.md)。其中包含设置页逐项填写方法、固定 argv 与表单参数的区别、EXE / JAR 完整示例和当前环境限制。
+
 ```yaml
 schema_version: 1
 app:

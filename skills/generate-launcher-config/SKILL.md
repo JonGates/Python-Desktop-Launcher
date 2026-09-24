@@ -1,11 +1,11 @@
 ---
 name: generate-launcher-config
-description: Generate or update Python Desktop Launcher launcher.yaml from a Python project's real entry points, CLI parameters, and environment. Use when connecting a project to this launcher or creating its launch actions and parameter forms.
+description: Generate or update Python Desktop Launcher launcher.yaml from real entry points, CLI parameters, and environment. Use when connecting a Python project or configuring packaged EXE/JAR launch actions and parameter forms, within the launcher's current Python-environment requirement.
 ---
 
 # Generate launcher configuration
 
-Create a UTF-8 `launcher.yaml` for one Python project. Read [the schema and example](references/config.md) before generating YAML. This reference travels with the skill; it does not require the launcher's source repository. When the user provides a different launcher version's local `docs/CONFIG.md`, check it for compatibility.
+Create a UTF-8 `launcher.yaml` for one project. Read [the schema and examples](references/config.md) before generating YAML, including its packaged-program section for EXE/JAR requests. This reference travels with the skill; it does not require the launcher's source repository. When the user provides a different launcher version's local `docs/CONFIG.md`, check it for compatibility.
 
 ## Inspect the target
 
@@ -15,6 +15,8 @@ Create a UTF-8 `launcher.yaml` for one Python project. Read [the schema and exam
 - Use the project's name and description for `app`; omit unknown version/output directory rather than copying launcher metadata. An output directory button does not supply a business CLI argument.
 
 ## Build the configuration
+
+For packaged programs, inspect the actual artifact path and documented CLI rather than inventing a Python wrapper. EXEs use their executable path; JARs use Java followed by JVM options, `-jar`, then the JAR path. Keep JVM options before `-jar`; editable application parameters append after the JAR. Explain the UI setup and environment prerequisites from the reference. Every action still requires the launcher's bound Python environment, even when the artifact itself needs no Python. A missing environment is a readiness limitation, not grounds to invent a `java`, `go`, `exe` or `native` runtime mode or fake environment files.
 
 Use only fields in the reference. Start from the minimal example, replacing all scenario-specific values. Actions use tokenized `argv`; parameter definitions are top-level and actions reference their `name`. No `{parameter}` interpolation, `command` strings, `executable`, `choices`, or nested parameter objects.
 

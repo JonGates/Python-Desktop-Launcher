@@ -87,6 +87,8 @@ my-project/
 
 ## 使用 AI 生成启动配置
 
+配置前可先阅读[启动动作与参数配置说明](docs/LAUNCH_ACTIONS.md)，尤其是已打包的 EXE / JAR。EXE 选择「其他程序」，目标填写实际程序路径；JAR 选择「高级命令」，按行填写 `java`、JVM 选项、`-jar`、JAR 路径。业务参数通过当前动作的参数表单追加，JVM 选项须在 `-jar` 前。当前这些动作仍需绑定 Python 虚拟环境，不能作为免 Python 的运行模式。可参考[完整 YAML 示例](docs/examples/packaged-apps.yaml)。
+
 仓库提供 [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md)：让 AI 根据 Python 项目的真实入口、命令行参数和环境生成 `launcher.yaml`。配置规范随 skill 一起提供，复制整个目录后可独立使用。
 
 无需安装，也可直接给 AI 以下指令（把示例路径替换为实际路径）：
