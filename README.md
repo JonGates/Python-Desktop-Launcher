@@ -26,17 +26,14 @@ One project per launcher. Currently **one GUI job at a time**, with multiple ter
 
 ### 1. Get Launcher.exe
 
-Get the **portable ZIP** from [Releases](https://github.com/JonGates/Python-Desktop-Launcher/releases). Choose **win-x64** for 64-bit Windows (recommended), or **win-x86** for 32-bit Windows. Extract it and keep its licenses.
+Download the **EXE** for your Windows architecture—no extraction or installation required:
 
-To build from source instead, use Windows and the **.NET 10 SDK**:
+- [Download v1.0.0 for Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x64.exe) — recommended for 64-bit Windows.
+- [Download v1.0.0 for Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x86.exe) — for 32-bit Windows.
 
-```powershell
-git clone https://github.com/JonGates/Python-Desktop-Launcher.git
-cd Python-Desktop-Launcher
-.\Build.cmd
-```
+Place it in your project directory. You may rename it to `Launcher.exe` to match the examples below. The launcher is self-contained; the project still needs its own Python environment.
 
-Output: `artifacts/portable/Launcher.exe`. This is a self-contained single-file build; the project still needs its own Python environment. [Build details](docs/BUILD_WINDOWS.md).
+The [release page](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.0.0) also offers optional ZIP packages with licenses. Retain the relevant licenses when redistributing. For source builds, see [Windows build instructions](docs/BUILD_WINDOWS.md).
 
 ### 2. Copy it into your project
 
@@ -85,9 +82,98 @@ Select an action under **Run project**, adjust its values and click **Start acti
 
 Configuration trust and dependency changes require confirmation. Errors use dismissible overlay notifications without pushing the editor down.
 
-## Generate configuration with AI
+## Go EXE and Java JAR examples
 
-For packaged applications, use **Other program** with the EXE path, or **Advanced command** with one token per line: `java`, JVM options, `-jar`, and the JAR path. Add editable application inputs through the action's parameter form; they are appended after the fixed command. JVM options must stay before `-jar`. All actions currently still require a bound Python virtual environment. See the [step-by-step EXE/JAR guide (Chinese)](docs/LAUNCH_ACTIONS.md) and [complete YAML example](docs/examples/packaged-apps.yaml).
+**Current limitation: both examples still require a bound Python virtual environment.** They use existing launch actions, not dedicated Go/Java runtime modes. Prepare the business EXE/JAR and its dependencies separately. The filenames and CLI options below illustrate programs that actually accept these options; adapt them to your application.
+
+### Go: launch an already-built EXE
+
+Suppose your Go program is packaged as `bin/report.exe` and accepts:
+
+```text
+./bin/report.exe --input "D:\data\sales report.csv" --workers 4
+```
+
+In **Project settings → Launch actions → Add action**, enter:
+
+| Setting | Value |
+|---|---|
+| Action name | Go report |
+| Launch type | Other program |
+| Target | ./bin/report.exe |
+| Input parameter | Name: Input file; type: file; binding: argument; command argument: --input; required; must exist |
+| Workers parameter | Name: Workers; type: integer; binding: argument; command argument: --workers; default: 4; min: 1; max: 32 |
+
+Click **Save and view**, choose the input file, adjust workers, inspect the command preview and start the action. The launcher executes the packaged EXE directly; it does not run `go build` or require the Go compiler for this action. Preserve any resources/native libraries the program needs. A file path containing spaces remains one argument; do not add literal quotes in the target field or file input.
+
+### Java: launch an already-built JAR
+
+Suppose `dist/service.jar` has a runnable entry point and accepts `--port 8080`. Java must already be available. Choose **Advanced command** and replace the fixed command with these five lines (one argument per line):
+
+```text
+java
+-Xmx512m
+-Dapp.mode=prod
+-jar
+./dist/service.jar
+```
+
+Add a **Port** parameter: type `integer`, binding `argument`, command argument `--port`, default `8080`, min `1`, max `65535`. After **Save and view**, changing the port to `9090` produces:
+
+```text
+java -Xmx512m -Dapp.mode=prod -jar ./dist/service.jar --port 9090
+```
+
+Keep JVM options (`-Xmx...`, `-D...`) **before `-jar`** in the fixed command; the form appends application arguments after the JAR. If Java is not on the child process PATH, replace the first line with the real full path to `java.exe`, without surrounding quotes in the editor. A JAR is not an EXE and cannot be selected directly as Other program.
+
+### YAML equivalent for both actions
+
+The following is a complete configuration example. Put it beside `Launcher.exe`, with a real `.venv`, `bin/report.exe` and `dist/service.jar` under the same project root. Review/merge it in settings if you already have a configuration; do not overwrite it blindly. No business binaries are included with this example.
+
+```yaml
+schema_version: 1
+app:
+  name: Packaged tools
+runtime:
+  mode: existing
+  project_dir: .
+  venv: .venv
+  requirements: ''
+actions:
+  - id: go_report
+    label: Go report
+    argv: ['./bin/report.exe']
+    parameters: [input, workers]
+  - id: java_service
+    label: Java service
+    argv: [java, -Xmx512m, '-Dapp.mode=prod', -jar, './dist/service.jar']
+    parameters: [port]
+parameters:
+  - name: input
+    label: Input file
+    type: file
+    argument: --input
+    required: true
+    must_exist: true
+  - name: workers
+    label: Workers
+    type: integer
+    argument: --workers
+    default: 4
+    min: 1
+    max: 32
+  - name: port
+    label: Port
+    type: integer
+    argument: --port
+    default: 8080
+    min: 1
+    max: 65535
+```
+
+The fixed `argv` selects the program and its fixed options; action `parameters` lists select which form fields to append, in order. `name` is an internal reference; `argument` is the actual CLI option. Do not put the same editable option in both places. All actions run in `runtime.project_dir`, not automatically beside the executable. These examples use separate option/value tokens; for applications requiring `--port=8080`, see the [detailed configuration guide](docs/LAUNCH_ACTIONS.md).
+
+## Generate configuration with AI
 
 The included [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md) reads your Python project's entry points, CLI definitions and environment to generate `launcher.yaml`. Its bundled schema reference works independently of this repository.
 

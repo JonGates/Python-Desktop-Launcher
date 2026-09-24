@@ -26,17 +26,14 @@ Windows x64 / x86 · 原生 C# / WPF · 中英文 · MIT · **v1.0.0**
 
 ### 1. 获取 Launcher.exe
 
-到 [Releases](https://github.com/JonGates/Python-Desktop-Launcher/releases) 下载 **portable ZIP**。64 位 Windows 选择 **win-x64**（推荐），32 位 Windows 选择 **win-x86**。解压并保留随附许可证。
+直接下载对应架构的 **EXE**，无需解压或安装：
 
-也可以在 Windows 上使用 **.NET 10 SDK** 从源码构建：
+- [下载 v1.0.0 · Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x64.exe)：64 位 Windows，推荐。
+- [下载 v1.0.0 · Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x86.exe)：32 位 Windows。
 
-```powershell
-git clone https://github.com/JonGates/Python-Desktop-Launcher.git
-cd Python-Desktop-Launcher
-.\Build.cmd
-```
+将下载的文件放入项目目录，可重命名为 `Launcher.exe`，方便对应下文示例。启动器是自包含程序，业务项目仍需自己的 Python 环境。
 
-输出：`artifacts/portable/Launcher.exe`。这是自包含单文件构建，业务项目仍需自己的 Python 环境。[构建详情](docs/BUILD_WINDOWS.md)。
+[发布页](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.0.0)同时提供附带许可证的可选 ZIP 包，重新分发时请保留相关许可证。需要从源码构建时，参阅 [Windows 构建说明](docs/BUILD_WINDOWS.md)。
 
 ### 2. 复制到项目
 
@@ -85,9 +82,98 @@ my-project/
 
 配置信任与依赖修改需要确认。错误使用可关闭的悬浮通知，不会把编辑区挤下去。
 
-## 使用 AI 生成启动配置
+## Go EXE 与 Java JAR 启动案例
 
-配置前可先阅读[启动动作与参数配置说明](docs/LAUNCH_ACTIONS.md)，尤其是已打包的 EXE / JAR。EXE 选择「其他程序」，目标填写实际程序路径；JAR 选择「高级命令」，按行填写 `java`、JVM 选项、`-jar`、JAR 路径。业务参数通过当前动作的参数表单追加，JVM 选项须在 `-jar` 前。当前这些动作仍需绑定 Python 虚拟环境，不能作为免 Python 的运行模式。可参考[完整 YAML 示例](docs/examples/packaged-apps.yaml)。
+**当前限制：以下两种动作仍要求绑定的 Python 虚拟环境存在。** 案例使用现有启动动作能力，并非新增 Go / Java 环境模式。业务 EXE / JAR 及其运行依赖需自行准备；示例文件名和参数假定程序确实支持，请按实际程序调整。
+
+### Go：启动已经编译好的 EXE
+
+假设 Go 程序已打包为 `bin/report.exe`，支持以下命令：
+
+```text
+./bin/report.exe --input "D:\data\sales report.csv" --workers 4
+```
+
+进入「项目设置 → 启动动作 → 添加动作」，填写：
+
+| 设置 | 填写内容 |
+|---|---|
+| 动作名称 | Go 报表 |
+| 启动方式 | 其他程序 |
+| 执行目标 | ./bin/report.exe |
+| 添加输入参数 | 名称：输入文件；类型：file；绑定：argument；命令参数：--input；必填；要求文件存在 |
+| 添加并发参数 | 名称：并发数；类型：integer；绑定：argument；命令参数：--workers；默认：4；最小：1；最大：32 |
+
+点击「保存并查看」，选择输入文件，调整并发数，检查命令预览后启动。这里直接执行业务 EXE，不执行 `go build`，运行此动作不需要 Go 编译器；程序所需的资源和本地库仍须保留。含空格路径会保持为一个参数，目标输入框和文件参数中不用自己加引号。
+
+### Java：启动已经打包好的 JAR
+
+假设 `dist/service.jar` 有可运行入口，业务支持 `--port 8080`，并且机器已准备好 Java。启动方式选择「高级命令」，将固定命令完整替换为以下五行，每行一个参数：
+
+```text
+java
+-Xmx512m
+-Dapp.mode=prod
+-jar
+./dist/service.jar
+```
+
+添加「端口」参数：类型 `integer`，绑定 `argument`，命令参数 `--port`，默认 `8080`，最小 `1`，最大 `65535`。「保存并查看」后，把端口改为 `9090`，实际命令结构为：
+
+```text
+java -Xmx512m -Dapp.mode=prod -jar ./dist/service.jar --port 9090
+```
+
+`-Xmx...`、`-D...` 是 JVM 参数，固定放在 **`-jar` 前**；表单填写的业务参数追加在 JAR 后。如果子进程 PATH 找不到 Java，将第一行替换为实际 `java.exe` 的完整路径，在编辑框中不要额外加引号。JAR 不能像 EXE 一样直接作为「其他程序」执行。
+
+### 两个动作对应的完整 YAML
+
+下面是一份完整配置示例。将其放在 `Launcher.exe` 旁，项目根目录下需有真实 `.venv`、`bin/report.exe` 和 `dist/service.jar`。已有配置时请在设置页审阅合并，不要直接覆盖。示例不附带这些业务程序。
+
+```yaml
+schema_version: 1
+app:
+  name: 打包程序示例
+runtime:
+  mode: existing
+  project_dir: .
+  venv: .venv
+  requirements: ''
+actions:
+  - id: go_report
+    label: Go 报表
+    argv: ['./bin/report.exe']
+    parameters: [input, workers]
+  - id: java_service
+    label: Java 服务
+    argv: [java, -Xmx512m, '-Dapp.mode=prod', -jar, './dist/service.jar']
+    parameters: [port]
+parameters:
+  - name: input
+    label: 输入文件
+    type: file
+    argument: --input
+    required: true
+    must_exist: true
+  - name: workers
+    label: 并发数
+    type: integer
+    argument: --workers
+    default: 4
+    min: 1
+    max: 32
+  - name: port
+    label: 端口
+    type: integer
+    argument: --port
+    default: 8080
+    min: 1
+    max: 65535
+```
+
+固定 `argv` 决定程序和固定选项；动作的 `parameters` 列表决定追加哪些表单参数及其顺序。`name` 用于配置内部引用，`argument` 才是实际命令选项；可编辑选项不要重复写进固定 argv。所有动作的工作目录均为 `runtime.project_dir`，不会自动切到 EXE 所在目录。案例采用选项和值分开的语法；只接受 `--port=8080` 等形式的程序，参阅[详细配置说明](docs/LAUNCH_ACTIONS.md)。
+
+## 使用 AI 生成启动配置
 
 仓库提供 [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md)：让 AI 根据 Python 项目的真实入口、命令行参数和环境生成 `launcher.yaml`。配置规范随 skill 一起提供，复制整个目录后可独立使用。
 
