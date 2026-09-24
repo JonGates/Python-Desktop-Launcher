@@ -82,6 +82,91 @@ my-project/
 
 配置信任与依赖修改需要确认。错误使用可关闭的悬浮通知，不会把编辑区挤下去。
 
+## 参数使用说明与案例
+
+先确认程序接受哪种形式，再配置参数。下面的 YAML 是互相独立的片段：分别替换配置中的 `actions` 和顶层 `parameters`，保留项目自己的 `schema_version`、`app` 和 `runtime`。可视化设置中，在当前动作点击「添加参数」，填写对应类型、绑定和命令参数即可。
+
+### 1. 选项与值分开：`--port 8000`
+
+例如程序接受 `python main.py --port 8000`。参数类型选 `integer`，绑定选 `argument`，命令参数填 `--port`，默认值填 `8000`。
+
+```yaml
+actions:
+  - id: run
+    label: 启动服务
+    argv: [python, main.py]
+    parameters: [port]
+parameters:
+  - name: port
+    label: 端口
+    type: integer
+    binding: argument
+    argument: --port
+    default: 8000
+    min: 1
+    max: 65535
+```
+
+实际追加两个独立参数：`--port`、`8000`。不要在「命令参数」里填写 `--port 8000`，也不要在固定 argv 中重复写入该选项。
+
+### 2. 选项与值连在一起：`--port=8000`
+
+**当前版本没有“等号连接”选项。** `argument: --port=` 仍会产生 `--port=`、`8000` 两个参数，不等于一个 `--port=8000`。
+
+固定端口时，直接使用 `argv: [python, main.py, '--port=8000']`，动作的 `parameters: []`。需要让用户修改时，现有替代方法是将**整个参数**作为位置文本传递：
+
+```yaml
+actions:
+  - id: run
+    label: 启动服务
+    argv: [python, main.py]
+    parameters: [port_token]
+parameters:
+  - name: port_token
+    label: 端口参数（填写完整 --port=数值）
+    type: text
+    binding: positional
+    required: true
+    default: '--port=8000'
+```
+
+表单中填写 `--port=9000`，就追加一个完整参数 `--port=9000`。这里借用 positional 表示“原样传入该值”，不代表业务程序把它当作位置参数。此方法没有独立的整数或端口范围校验；不能只填写 `9000`，也不用手动加引号。
+
+### 3. 位置参数：`main.py xx yy zz`
+
+例如程序接受 `python main.py xx yy zz`，不需要 `--xxx` 选项名。添加三个 text 参数，绑定都选 `positional`，命令参数留空，并按所需顺序排列。
+
+```yaml
+actions:
+  - id: run
+    label: 按顺序传参
+    argv: [python, main.py]
+    parameters: [first, second, third]
+parameters:
+  - name: first
+    label: 第一个值
+    type: text
+    binding: positional
+    required: true
+    default: xx
+  - name: second
+    label: 第二个值
+    type: text
+    binding: positional
+    required: true
+    default: yy
+  - name: third
+    label: 第三个值
+    type: text
+    binding: positional
+    required: true
+    default: zz
+```
+
+顺序取自动作的 `parameters: [first, second, third]`。如果第二个值填 `hello world`，它仍是一个参数，不会拆成两个；把 `xx yy zz` 填进一个文本框也只会传一个参数。必需的位置参数应勾选必填，避免空值被省略后后续参数前移。
+
+选项参数和位置参数可以混用，均在固定 argv 后按引用顺序追加，需符合业务程序的解析规则。对于只需开关的 `--verbose`，使用 boolean + argument + `boolean_mode: flag`：启用时只传 `--verbose`，关闭时默认不传；需要 `--enabled true/false` 时使用 `boolean_mode: value`。保存后到运行页核对命令预览，再执行。
+
 ## Go EXE 与 Java JAR 启动案例
 
 **当前限制：以下两种动作仍要求绑定的 Python 虚拟环境存在。** 案例使用现有启动动作能力，并非新增 Go / Java 环境模式。业务 EXE / JAR 及其运行依赖需自行准备；示例文件名和参数假定程序确实支持，请按实际程序调整。

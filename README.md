@@ -82,6 +82,91 @@ Select an action under **Run project**, adjust its values and click **Start acti
 
 Configuration trust and dependency changes require confirmation. Errors use dismissible overlay notifications without pushing the editor down.
 
+## Parameter usage and examples
+
+First check which syntax your program accepts. Each YAML block below is an independent fragment: replace `actions` and top-level `parameters`, keeping your project's `schema_version`, `app` and `runtime`. In the visual editor, use **Add parameter** for the current action and set the corresponding type, binding and command argument.
+
+### 1. Separate option and value: `--port 8000`
+
+For `python main.py --port 8000`, select type `integer`, binding `argument`, command argument `--port`, and default `8000`.
+
+```yaml
+actions:
+  - id: run
+    label: Start service
+    argv: [python, main.py]
+    parameters: [port]
+parameters:
+  - name: port
+    label: Port
+    type: integer
+    binding: argument
+    argument: --port
+    default: 8000
+    min: 1
+    max: 65535
+```
+
+This appends two independent tokens: `--port`, `8000`. Do not enter `--port 8000` in the command argument field or duplicate the option in fixed argv.
+
+### 2. Joined option and value: `--port=8000`
+
+**The current version has no equals-joining setting.** `argument: --port=` still produces two tokens, `--port=` and `8000`, not a single `--port=8000`.
+
+For a fixed port, use `argv: [python, main.py, '--port=8000']` with action `parameters: []`. To make it editable using existing controls, pass the **whole token** as positional text:
+
+```yaml
+actions:
+  - id: run
+    label: Start service
+    argv: [python, main.py]
+    parameters: [port_token]
+parameters:
+  - name: port_token
+    label: Port argument (enter the complete --port=value)
+    type: text
+    binding: positional
+    required: true
+    default: '--port=8000'
+```
+
+Entering `--port=9000` appends one complete token. Here positional means “pass the value unchanged”; the business program can still parse it as an option. This workaround provides no separate integer/range validation. Enter the full token, not just `9000`, and do not add literal quotes.
+
+### 3. Positional arguments: `main.py xx yy zz`
+
+For `python main.py xx yy zz`, add three text parameters with `positional` binding, leave their command argument fields empty, and arrange them in the required order.
+
+```yaml
+actions:
+  - id: run
+    label: Ordered arguments
+    argv: [python, main.py]
+    parameters: [first, second, third]
+parameters:
+  - name: first
+    label: First value
+    type: text
+    binding: positional
+    required: true
+    default: xx
+  - name: second
+    label: Second value
+    type: text
+    binding: positional
+    required: true
+    default: yy
+  - name: third
+    label: Third value
+    type: text
+    binding: positional
+    required: true
+    default: zz
+```
+
+Order comes from the action's `parameters: [first, second, third]`. A second value of `hello world` remains one argument. Likewise, typing `xx yy zz` into one text field sends one argument, not three. Mark mandatory positional inputs as required so omission of empty values cannot shift subsequent arguments.
+
+Option and positional parameters can be mixed; both append after fixed argv in reference order and must match the program's parser. For a value-free switch such as `--verbose`, use boolean + argument + `boolean_mode: flag`: true emits only the switch; false emits nothing by default. Use `boolean_mode: value` for `--enabled true/false`. After saving, inspect the command preview before running.
+
 ## Go EXE and Java JAR examples
 
 **Current limitation: both examples still require a bound Python virtual environment.** They use existing launch actions, not dedicated Go/Java runtime modes. Prepare the business EXE/JAR and its dependencies separately. The filenames and CLI options below illustrate programs that actually accept these options; adapt them to your application.
