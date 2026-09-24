@@ -6,7 +6,7 @@
 
 Turn project commands into forms. Copy `Launcher.exe` into your Python project, bind its environment, and configure actions and parameters—without changing business code.
 
-Windows x64 / x86 · Native C# / WPF · Chinese / English · MIT · **v1.0.0**
+Windows x64 / x86 · Native C# / WPF · Chinese / English · MIT · **v1.1.0**
 
 ![Native WPF action settings](docs/images/launcher-en.png)
 
@@ -28,12 +28,12 @@ One project per launcher. Currently **one GUI job at a time**, with multiple ter
 
 Download the **EXE** for your Windows architecture—no extraction or installation required:
 
-- [Download v1.0.0 for Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x64.exe) — recommended for 64-bit Windows.
-- [Download v1.0.0 for Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x86.exe) — for 32-bit Windows.
+- [Download v1.1.0 for Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.1.0/Launcher-v1.1.0-win-x64.exe) — recommended for 64-bit Windows.
+- [Download v1.1.0 for Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.1.0/Launcher-v1.1.0-win-x86.exe) — for 32-bit Windows.
 
 Place it in your project directory. You may rename it to `Launcher.exe` to match the examples below. The launcher is self-contained; the project still needs its own Python environment.
 
-The [release page](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.0.0) also offers optional ZIP packages with licenses. Retain the relevant licenses when redistributing. For source builds, see [Windows build instructions](docs/BUILD_WINDOWS.md).
+The [release page](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.1.0) also offers optional ZIP packages with licenses. Retain the relevant licenses when redistributing. For source builds, see [Windows build instructions](docs/BUILD_WINDOWS.md).
 
 ### 2. Copy it into your project
 
@@ -217,7 +217,7 @@ No. Explicit commands can leave the project environment. Use the system-terminal
 
 **Is this production-ready?**
 
-v1.0.0 binaries are unsigned. Native builds and automated tests have been run; manual DPI, IME, clean-machine and full business-workflow acceptance remain outstanding. See [exact verification scope](docs/TESTING.md).
+v1.1.0 binaries are unsigned. Native builds and automated tests have been run; manual DPI, IME, clean-machine and full business-workflow acceptance remain outstanding. See [exact verification scope](docs/TESTING.md).
 
 ## Learn more & contribute
 

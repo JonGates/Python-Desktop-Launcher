@@ -16,7 +16,7 @@
       "projectlauncher.windows": {
         "type": "Project",
         "dependencies": {
-          "ProjectLauncher.Core": "[1.0.0, )"
+          "ProjectLauncher.Core": "[1.1.0, )"
         }
       }
     }

@@ -10,7 +10,7 @@ return await LauncherCli.MainAsync(args);
 internal static class LauncherCli
 {
     private const string Help = """
-Project Launcher CLI · 1.0.0 · Windows
+Project Launcher CLI · 1.1.0 · Windows
 
 Launcher.Cli.exe check [--project PATH]
 Launcher.Cli.exe list [--project PATH]

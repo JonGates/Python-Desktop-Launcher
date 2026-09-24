@@ -2,7 +2,7 @@
 
 ## 先跑通构建，再扩功能
 
-安装 .NET 10 SDK，在 Windows 上打开 `ProjectLauncher.sln` 或运行 `Start-Dev.cmd`。本次已完成 Windows Release 编译、自动化测试和 win-x64 单文件发布，结果见 [测试记录](TESTING.md)；修改后仍应重新执行 Build / Test-Windows。人工验收尚未完成，保留 preview 标识。
+安装 .NET 10 SDK，在 Windows 上打开 `ProjectLauncher.sln` 或运行 `Start-Dev.cmd`。本次已完成 Windows Release 编译、自动化测试和 win-x64 单文件发布，结果见 [测试记录](TESTING.md)；修改后仍应重新执行 Build / Test-Windows。正式发布仍需如实保留未完成的人工验收范围，见测试记录。
 
 ```powershell
 dotnet restore ProjectLauncher.sln

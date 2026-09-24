@@ -1,5 +1,14 @@
 # Change log
 
+## 1.1.0 — 2026-09-24
+
+- Updated About information to match the current product; the displayed launcher version now comes from the assembly.
+- Added the reusable generate-launcher-config AI skill with schema guidance, validation and backup rules.
+- Made standalone x64/x86 EXE downloads the primary README workflow.
+- Added Go EXE and Java JAR configuration examples directly to both READMEs, including parameter forms and JVM/application argument ordering.
+- Included the skill and configuration examples in ZIP packages.
+- Go/Java examples use existing actions and still require a bound Python environment; no independent Go/Java runtime mode was introduced. Binaries remain unsigned; manual DPI/IME and clean-machine acceptance limitations remain documented.
+
 ## 1.0.0 — 2026-09-23
 
 - Added live Chinese/English UI and per-user language preferences; drafts, running jobs and terminal sessions survive switching.

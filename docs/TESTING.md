@@ -1,8 +1,16 @@
 # 验证记录与 Windows 验收
 
-版本：**1.0.0**。记录日期：2026-09-23。已完成 win-x64 单文件发布；以下区分自动测试与仍待完成的人工验收。
+当前发布版本：**1.1.0**。记录日期：2026-09-24。已完成 win-x64 / win-x86 自包含单文件构建；下方保留 1.0.0 历史记录，旧哈希不适用于 1.1.0。
 
 ## 本次实际执行了什么
+
+### 1.1.0 正式发布验证（2026-09-24）
+
+- 两次 `tools/Build.ps1` 分别指定 win-x64 / win-x86，均退出 0；Release 构建 0 警告、0 错误，Core 84 passed / 0 failed。x64 同时指定 `-VerifyWindows`，完整执行 Test-Windows。
+- x64 / x86 各通过 4 项原生 ConPTY / Job / 项目锁测试、37 项 WPF 检查（各 62 张实际渲染图片）、6 项 Test-Portable 单 EXE 接入检查。x86 原生规格以自包含方式发布运行；x86 WPF 使用本次发布 EXE，在 x64 Windows WOW64 下运行。
+- Demo 13 项测试通过；静态检查通过。EXE 文件版本均为 1.1.0.0；校验值以 Release 附件 SHA256SUMS.txt 为准。
+- ZIP 加入 skills 和 docs/examples，核对 README、skill、配置示例和许可证实际存在，且独立 EXE 与对应 ZIP 内 Launcher.exe 字节一致。
+- 1.1.0 是正式 Release，不代表已完成所有人工验收。程序未签名，人工 DPI / IME、完整业务工作流、无 .NET 干净机器及独立 32 位 Windows 验收仍未完成；Go / Java 案例仍要求绑定 Python 环境。
 
 ### 2026-09-24：EXE / JAR 启动配置说明
 

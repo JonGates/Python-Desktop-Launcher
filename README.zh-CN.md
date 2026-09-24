@@ -6,7 +6,7 @@
 
 把项目命令变成易用的表单：将 `Launcher.exe` 复制到 Python 项目，绑定项目环境，配置动作和参数，无需改动业务代码。
 
-Windows x64 / x86 · 原生 C# / WPF · 中英文 · MIT · **v1.0.0**
+Windows x64 / x86 · 原生 C# / WPF · 中英文 · MIT · **v1.1.0**
 
 ![原生 WPF 启动动作设置](docs/images/launcher-zh-CN.png)
 
@@ -28,12 +28,12 @@ Windows x64 / x86 · 原生 C# / WPF · 中英文 · MIT · **v1.0.0**
 
 直接下载对应架构的 **EXE**，无需解压或安装：
 
-- [下载 v1.0.0 · Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x64.exe)：64 位 Windows，推荐。
-- [下载 v1.0.0 · Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.0.0/Launcher-v1.0.0-win-x86.exe)：32 位 Windows。
+- [下载 v1.1.0 · Windows x64](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.1.0/Launcher-v1.1.0-win-x64.exe)：64 位 Windows，推荐。
+- [下载 v1.1.0 · Windows x86](https://github.com/JonGates/Python-Desktop-Launcher/releases/download/v1.1.0/Launcher-v1.1.0-win-x86.exe)：32 位 Windows。
 
 将下载的文件放入项目目录，可重命名为 `Launcher.exe`，方便对应下文示例。启动器是自包含程序，业务项目仍需自己的 Python 环境。
 
-[发布页](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.0.0)同时提供附带许可证的可选 ZIP 包，重新分发时请保留相关许可证。需要从源码构建时，参阅 [Windows 构建说明](docs/BUILD_WINDOWS.md)。
+[发布页](https://github.com/JonGates/Python-Desktop-Launcher/releases/tag/v1.1.0)同时提供附带许可证的可选 ZIP 包，重新分发时请保留相关许可证。需要从源码构建时，参阅 [Windows 构建说明](docs/BUILD_WINDOWS.md)。
 
 ### 2. 复制到项目
 
@@ -217,7 +217,7 @@ skill 会检查已有配置是否被外部修改，并在替换前备份。入�
 
 **现在是正式稳定版吗？**
 
-v1.0.0 程序未签名。已进行原生构建和自动测试，人工 DPI、IME、干净机器与完整业务流程验收尚未完成。详见 [准确的验证范围](docs/TESTING.md)。
+v1.1.0 程序未签名。已进行原生构建和自动测试，人工 DPI、IME、干净机器与完整业务流程验收尚未完成。详见 [准确的验证范围](docs/TESTING.md)。
 
 ## 更多文档与参与贡献
 

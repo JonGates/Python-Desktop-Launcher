@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Project Launcher Contributors</Authors>
     <Product>Project Launcher</Product>
     <Copyright>Copyright (c) 2026 Project Launcher Contributors</Copyright>

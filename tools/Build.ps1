@@ -80,6 +80,8 @@ try {
         New-Item -ItemType Directory -Force -Path (Join-Path $dest 'docs') | Out-Null
         Get-ChildItem (Join-Path $root 'docs') -Filter '*.md' -File | Copy-Item -Destination (Join-Path $dest 'docs') -Force
         Copy-Item (Join-Path $root 'docs/images') -Destination (Join-Path $dest 'docs') -Recurse
+        Copy-Item (Join-Path $root 'docs/examples') -Destination (Join-Path $dest 'docs') -Recurse
+        Copy-Item (Join-Path $root 'skills') -Destination $dest -Recurse
     }
     Copy-LicenseNotices (Join-Path $portable 'licenses')
     Copy-Item -LiteralPath (Join-Path $portable 'licenses') -Destination $demo -Recurse
