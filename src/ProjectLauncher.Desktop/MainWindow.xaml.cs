@@ -121,7 +121,8 @@ public partial class MainWindow : Window
     { try { Process.Start(new ProcessStartInfo(Shell.ProjectRoot) { UseShellExecute = true }); } catch (Exception ex) { Shell.Notify(ex); } }
     private void DismissNotice_Click(object sender, RoutedEventArgs e) => Shell.DismissNotification();
     private void NoticeDetail_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, L.Text("Text.018"), Shell.NotificationDetail);
-    private void About_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this, "Project Launcher 2.0 · C# Preview",
+    private void About_Click(object sender, RoutedEventArgs e) => Dialogs.Info(this,
+        $"Python Desktop Launcher · v{typeof(MainWindow).Assembly.GetName().Version!.ToString(3)}",
         L.Text("Text.019") );
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {

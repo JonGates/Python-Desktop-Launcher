@@ -85,6 +85,30 @@ my-project/
 
 配置信任与依赖修改需要确认。错误使用可关闭的悬浮通知，不会把编辑区挤下去。
 
+## 使用 AI 生成启动配置
+
+仓库提供 [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md)：让 AI 根据 Python 项目的真实入口、命令行参数和环境生成 `launcher.yaml`。配置规范随 skill 一起提供，复制整个目录后可独立使用。
+
+无需安装，也可直接给 AI 以下指令（把示例路径替换为实际路径）：
+
+```text
+读取 D:/tools/Python-Desktop-Launcher/skills/generate-launcher-config/SKILL.md，
+按该 skill 为 D:/projects/my-python-app 生成 launcher.yaml。
+从真实代码和文档确认启动入口、参数及其来源。
+如果有 Launcher.Cli.exe，使用 check 验证配置。
+不要运行业务代码，不要初始化环境或安装依赖。
+```
+
+经常使用时，将整个 `skills/generate-launcher-config` 文件夹复制到 AI 工具的 skills 目录。[Codex 当前文档](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)列出的个人目录为 `~/.agents/skills`，项目目录为 `<目标项目>/.agents/skills`；如果已安装版本使用其他 skills 位置，请按该版本的配置放置。发现该 skill 后输入：
+
+```text
+使用 $generate-launcher-config 为当前 Python 项目生成并验证 launcher.yaml。
+```
+
+skill 会检查已有配置是否被外部修改，并在替换前备份。入口不明确时，会询问实际启动命令，或只生成不含动作的环境绑定配置。无法运行启动器校验时会明确说明，并保留已有配置，另存候选文件供检查。
+
+生成后，在**项目设置**中核对配置，在运行页查看**命令预览**，再主动启动动作。配置校验不代表业务依赖已就绪；初始化环境、同步依赖仍需单独确认。字段详情见[配置规范](docs/CONFIG.md)。
+
 ## 常见问题
 
 **每次运行或安装库，都要填写 python.exe 吗？**

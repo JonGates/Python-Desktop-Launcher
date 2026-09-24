@@ -4,6 +4,15 @@
 
 ## 本次实际执行了什么
 
+### 2026-09-24：关于窗口与配置生成 skill
+
+- `tools/Test-Windows.ps1`：退出码 0；Release 构建 0 警告、0 错误；Core 84 passed / 0 failed，Windows 原生测试 4 项通过，WPF 报告 37 项 PASS。
+- 关于窗口新增中英 × 深浅主题 4 张实际 WPF 截图，本次共 62 张图片。新增标题回归先在旧版本文案上失败，修复后通过；标题读取程序集版本，当前显示 v1.0.0。
+- `python -m unittest discover -s tests/demo -v`：13 项通过；`python tools/check_static.py`：709 passed / 0 failed。
+- `python -X utf8 <skill-creator>/scripts/quick_validate.py skills/generate-launcher-config`：通过。默认 GBK 模式无法读取 UTF-8 skill，使用 Python UTF-8 模式后正常。
+- 独立 AI 试验先记录无规范时的错误 schema，再加载 skill 生成报告脚本、模块入口两种候选，实际 CLI `check` 均通过；包含位置参数、枚举、布尔 flag/value、整数范围和密码环境变量。未执行业务脚本或安装依赖；环境结构不存在如实报告。候选仅在忽略的 `artifacts/skill-trial` 中。
+- 本轮未重新发布便携 EXE；下方历史发布哈希不代表本次源码。人工 DPI、IME、干净机器及完整业务工作流验收仍未执行。
+
 验证环境：Windows 10.0.26200.9457 x64，.NET SDK 10.0.204，Microsoft.WindowsDesktop.App 10.0.8。以下命令在本机实际执行并以退出码判断；构建和测试产物位于被 `.gitignore` 排除的 `artifacts/`、`bin/`、`obj/`。
 
 | 检查 | 状态 | 证据与范围 |

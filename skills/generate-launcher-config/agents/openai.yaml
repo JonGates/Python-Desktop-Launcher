@@ -1,0 +1,4 @@
+interface:
+  display_name: "生成项目启动配置"
+  short_description: "根据 Python 项目的真实入口、参数和环境生成启动器 YAML 配置"
+  default_prompt: "使用 $generate-launcher-config 分析当前 Python 项目，生成并验证 launcher.yaml，说明入口依据和未验证项。"

@@ -85,6 +85,30 @@ Select an action under **Run project**, adjust its values and click **Start acti
 
 Configuration trust and dependency changes require confirmation. Errors use dismissible overlay notifications without pushing the editor down.
 
+## Generate configuration with AI
+
+The included [generate-launcher-config skill](skills/generate-launcher-config/SKILL.md) reads your Python project's entry points, CLI definitions and environment to generate `launcher.yaml`. Its bundled schema reference works independently of this repository.
+
+Give your AI assistant the skill path and target project (replace these example paths):
+
+```text
+Read D:/tools/Python-Desktop-Launcher/skills/generate-launcher-config/SKILL.md.
+Use it to generate launcher.yaml for D:/projects/my-python-app.
+Find the actual entry points and parameters, and explain their source locations.
+Validate with Launcher.Cli.exe check if available.
+Do not run business code or initialize/install dependencies.
+```
+
+For repeated use, copy the entire `skills/generate-launcher-config` folder into your AI tool's skills directory. Current [Codex skill documentation](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills) lists `~/.agents/skills` for personal use and `<target-project>/.agents/skills` for project use. If your installed version uses another skills location, use that configured location. Once the skill is available, invoke:
+
+```text
+Use $generate-launcher-config to generate and validate launcher.yaml for this Python project.
+```
+
+The skill checks for concurrent edits and backs up before replacing existing configuration. Unknown entry points require clarification or an environment-only configuration with no actions. If launcher validation is unavailable, it reports that limitation and leaves existing configuration untouched, producing a candidate for review.
+
+Review the result in **Project settings**, inspect the **command preview**, then explicitly start an action. Configuration validation does not prove dependency readiness; environment initialization/synchronization remains a separate confirmed action. See [configuration rules](docs/CONFIG.md).
+
 ## FAQ
 
 **Do I need a python.exe path for each command or package installation?**

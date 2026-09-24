@@ -22,6 +22,32 @@ internal static class LocalizationSmoke
         try
         {
             var failures = new List<string>();
+            foreach (var language in new[] { "zh-CN", "en-US" })
+            foreach (var theme in new[] { "light", "dark" })
+            {
+                LocalizationService.Current.SetLanguage(language);
+                ThemeService.Apply(theme);
+                _ = window.Dispatcher.BeginInvoke(new Action(() => {
+                    var dialog = window.OwnedWindows.Cast<Window>().Single();
+                    try
+                    {
+                        var version = typeof(MainWindow).Assembly.GetName().Version!.ToString(3);
+                        if (!dialog.Title.Contains("Python Desktop Launcher") || !dialog.Title.Contains(version)
+                            || dialog.Title.Contains("Preview")) failures.Add("About title does not match the current product/version.");
+                        dialog.UpdateLayout();
+                        var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)dialog.ActualWidth, (int)dialog.ActualHeight, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+                        bitmap.Render(dialog);
+                        var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                        using var stream = File.Create(Path.Combine(directory, $"about-{language}-{theme}.png"));
+                        encoder.Save(stream);
+                    }
+                    finally { dialog.Close(); }
+                }), DispatcherPriority.ApplicationIdle);
+                Descendants<Button>(window).Single(b => Equals(b.Content, "?"))
+                    .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            }
+            LocalizationService.Current.SetLanguage("zh-CN");
             window.ShowPage("run");
             await window.Dispatcher.InvokeAsync(window.UpdateLayout, DispatcherPriority.ApplicationIdle);
             var run = (Views.RunView)((ContentControl)window.FindName("PageHost")).Content;
